@@ -143,7 +143,7 @@ app.post("/api/login", (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password)
     return res.status(400).json({ error: "email/password required" });
-  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email) as any;
   if (!user) return res.status(401).json({ error: "invalid credentials" });
   const bcrypt = require("bcryptjs");
   if (!bcrypt.compareSync(password, user.password_hash))
@@ -188,7 +188,7 @@ app.post("/api/schema/push", (req, res) => {
     return res
       .status(400)
       .json({ error: "appId, appKey, version, schema required" });
-  const appRow = db.prepare("SELECT * FROM apps WHERE app_id = ?").get(appId);
+  const appRow = db.prepare("SELECT * FROM apps WHERE app_id = ?").get(appId) as any;
   if (!appRow || appRow.app_key !== appKey)
     return res.status(401).json({ error: "invalid app credentials" });
   const id = nanoid();
@@ -234,7 +234,7 @@ app.get("/api/schema/latest", (req, res) => {
     .prepare(
       "SELECT json FROM schemas WHERE app_id = ? ORDER BY created_at DESC LIMIT 1"
     )
-    .get(appId);
+    .get(appId) as any;
   if (!row) return res.status(404).json({ error: "no schema" });
   res.json(JSON.parse(row.json));
 });
@@ -298,7 +298,7 @@ app.get("/api/users", authMiddleware, (req, res) => {
   const rows = db
     .prepare("SELECT id, email, display_name, roles, banned FROM users")
     .all();
-  res.json(rows.map((r) => ({ ...r, roles: JSON.parse(r.roles || "[]") })));
+  res.json(rows.map((r: any) => ({ ...r, roles: JSON.parse(r.roles || "[]") })));
 });
 
 app.post("/api/users/roles", authMiddleware, (req, res) => {
@@ -307,7 +307,7 @@ app.post("/api/users/roles", authMiddleware, (req, res) => {
     return res.status(403).json({ error: "forbidden" });
   const { userId, add, remove } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId required" });
-  const u = db.prepare("SELECT roles FROM users WHERE id = ?").get(userId);
+  const u = db.prepare("SELECT roles FROM users WHERE id = ?").get(userId) as any;
   if (!u) return res.status(404).json({ error: "user not found" });
   const r: string[] = JSON.parse(u.roles || "[]");
   if (Array.isArray(add)) for (const x of add) if (!r.includes(x)) r.push(x);
@@ -391,7 +391,7 @@ io.on("connection", (socket) => {
 
   // If user is banned, disconnect immediately
   if (userId) {
-    const u = db.prepare("SELECT banned FROM users WHERE id = ?").get(userId);
+    const u = db.prepare("SELECT banned FROM users WHERE id = ?").get(userId) as any;
     if (u && u.banned) {
       socket.emit("system.connection", {
         type: "status",
@@ -481,7 +481,7 @@ io.on("connection", (socket) => {
         .prepare(
           "SELECT json FROM schemas WHERE app_id = ? ORDER BY created_at DESC LIMIT 1"
         )
-        .get(msg.appId);
+        .get(msg.appId) as any;
       if (!schemaRow) throw new Error("no schema for app");
       const schema = JSON.parse(schemaRow.json);
       const topic = schema.topics.find((t: any) => t.topic === msg.topic);

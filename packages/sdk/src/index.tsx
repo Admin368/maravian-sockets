@@ -155,7 +155,9 @@ export function SocketMaxProvider({
   useEffect(() => {
     const s = ensureSocket();
     if (autoConnect) s.connect();
-    return () => s.close();
+    return () => {
+      s.close();
+    };
   }, [ensureSocket, autoConnect]);
 
   const admin = useMemo(

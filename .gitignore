@@ -22,7 +22,11 @@ packages/sdk/dist/
 packages/types/dist/
 packages/cli/dist/
 
-# SQLite
+# SQLite and Data
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 /data/
+packages/*/data/
+apps/*/data/
