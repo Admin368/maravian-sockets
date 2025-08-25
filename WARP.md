@@ -16,27 +16,32 @@ Common commands
   - pnpm install
 
 - Build everything
-  - pnpm run build
+  - pnpm build
 
-- Build a single package/app
-  - pnpm --filter @maravian-sockets/server run build
+- Development (quick start)
+  - pnpm dev  (starts server in dev mode)
+  - pnpm start  (starts server from built output)
+
+- Server commands
+  - pnpm dev:server  (development with ts-node-dev, listens on :8080)
+  - pnpm build:server  (compile TypeScript)
+  - pnpm start:server  (run from built JS)
+
+- Dashboard commands  
+  - pnpm dev:dashboard  (Vite dev server, typically :5173)
+  - pnpm build:dashboard  (build for production)
+  - pnpm preview:dashboard  (preview built dashboard)
+
+- Build individual packages/apps
   - pnpm --filter @maravian-sockets/sdk run build
   - pnpm --filter @maravian-sockets/cli run build
   - pnpm --filter @maravian-sockets/types run build
-  - pnpm --filter @maravian-sockets/dashboard run build
 
-- Run server in development (ts-node-dev)
-  - pnpm run dev:server
-  - Server listens on http://localhost:8080 by default.
-
-- Run server from built output (production-like)
-  - pnpm start  (runs node packages/server/dist/index.js)
-
-- Run Dashboard in development (Vite)
-  - PowerShell example (Windows): set server URL for API calls
-    - $env:VITE_SERVER_URL = 'http://localhost:8080'
-    - pnpm --filter @maravian-sockets/dashboard run dev
-  - Note: Locally the Node server serves static files from packages/server/public. The Docker build copies the Dashboard into that folder. For local dev, prefer running the Vite dev server (above). To serve a built dashboard locally without Docker, copy apps/dashboard/dist into packages/server/public.
+- Dashboard development setup
+  - PowerShell (Windows): $env:VITE_SERVER_URL = 'http://localhost:8080'
+  - Bash (Linux/macOS): export VITE_SERVER_URL='http://localhost:8080'
+  - Then: pnpm dev:dashboard
+  - Note: In production, the server serves the built dashboard from packages/server/public.
 
 - CLI (develop and run locally)
   - Build CLI: pnpm --filter @maravian-sockets/cli run build
