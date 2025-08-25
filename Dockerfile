@@ -5,17 +5,18 @@ WORKDIR /app
 # --- deps ---
 FROM base AS deps
 COPY package.json tsconfig.base.json ./
+COPY pnpm-workspace.yaml ./
 COPY packages/types/package.json ./packages/types/package.json
 COPY packages/server/package.json ./packages/server/package.json
 COPY packages/sdk/package.json ./packages/sdk/package.json
 COPY packages/cli/package.json ./packages/cli/package.json
 COPY apps/dashboard/package.json ./apps/dashboard/package.json
-RUN npm install --workspaces
+RUN corepack enable && corepack prepare pnpm@9.7.0 --activate && pnpm install --frozen-lockfile=false
 
 # --- build ---
 FROM deps AS build
 COPY . .
-RUN npm run -ws build
+RUN pnpm -r run build && pnpm --filter @maravian-sockets/dashboard run build
 
 # Copy dashboard build into server public
 RUN mkdir -p packages/server/public && cp -r apps/dashboard/dist/* packages/server/public/
@@ -27,8 +28,9 @@ ENV NODE_ENV=production
 
 # Install only server production deps
 COPY package.json ./
+COPY pnpm-workspace.yaml ./
 COPY packages/server/package.json ./packages/server/package.json
-RUN npm install --workspaces --omit=dev
+RUN corepack enable && corepack prepare pnpm@9.7.0 --activate && pnpm install --filter @maravian-sockets/server --prod --frozen-lockfile=false
 
 # Copy built server
 COPY --from=build /app/packages/server/dist ./packages/server/dist

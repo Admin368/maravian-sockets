@@ -7,15 +7,14 @@
     "apps/*"
   ],
   "scripts": {
-    "install": "npm run -ws install || true",
-    "build": "npm run -ws build",
-    "dev:server": "npm run -w @maravian-sockets/server dev",
-    "build:dashboard": "npm run -w @maravian-sockets/dashboard build",
-    "start": "npm run -w @maravian-sockets/server start",
+    "build": "pnpm -r run build",
+    "dev:server": "pnpm --filter @maravian-sockets/server run dev",
+    "build:dashboard": "pnpm --filter @maravian-sockets/dashboard run build",
+    "start": "pnpm --filter @maravian-sockets/server run start",
     "format": "node -e \"console.log('format placeholder')\""
   },
   "engines": {
-    "node": ">=20 <21",
-    "npm": ">=8.0.0"
-  }
+    "node": ">=20 <21"
+  },
+  "packageManager": "pnpm@9.7.0"
 }
