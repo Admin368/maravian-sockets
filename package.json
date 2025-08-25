@@ -1,0 +1,21 @@
+{
+  "name": "socket-max",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "install": "npm run -ws install || true",
+    "build": "npm run -ws build",
+    "dev:server": "npm run -w @socket-max/server dev",
+    "build:dashboard": "npm run -w @socket-max/dashboard build",
+    "start": "npm run -w @socket-max/server start",
+    "format": "node -e \"console.log('format placeholder')\""
+  },
+  "engines": {
+    "node": ">=20 <21",
+    "npm": ">=8.0.0"
+  }
+}

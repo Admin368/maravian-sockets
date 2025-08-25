@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+  socket-max:
+    build: .
+    container_name: socket-max
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - JWT_SECRET=${JWT_SECRET:-dev-secret}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
+      - DB_PATH=/data/socketmax.db
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+    volumes:
+      - ./data:/data
