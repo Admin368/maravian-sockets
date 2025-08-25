@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Live } from './Live'
+import { AdminUsers } from './AdminUsers'
+import { SchemaPanel } from './SchemaPanel'
 
 const serverUrl = (import.meta as any).env?.VITE_SERVER_URL || window.location.origin
 
@@ -120,7 +122,10 @@ export function App() {
                   <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(rooms, null, 2)}</pre>
                 </Panel>
                 <Panel title="Schema (latest)">
-                  <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(schema, null, 2)}</pre>
+                  <SchemaPanel serverUrl={serverUrl} appId={appSel} schema={schema} onPushed={async()=>{
+                    setSchema(await api.latestSchema(appSel));
+                    setVersions(await api.schemaVersions(appSel));
+                  }} />
                 </Panel>
                 <Panel title="Connected Users">
                   <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(connected, null, 2)}</pre>
@@ -131,6 +136,7 @@ export function App() {
                 <Panel title="Schema Versions" className="md:col-span-3">
                   <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(versions, null, 2)}</pre>
                 </Panel>
+                <AdminUsers token={auth?.accessToken} />
               </div>
             )}
           </>

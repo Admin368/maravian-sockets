@@ -61,6 +61,11 @@ CREATE TABLE IF NOT EXISTS rooms (
   app_id TEXT NOT NULL,
   created_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS room_admins (
+  room_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  PRIMARY KEY (room_id, user_id)
+);
 CREATE TABLE IF NOT EXISTS messages (
   id TEXT PRIMARY KEY,
   app_id TEXT NOT NULL,
@@ -90,6 +95,7 @@ if (adminEmail && adminPassword) {
 
 const ajv = new Ajv({ allErrors: true, removeAdditional: "failing" });
 addFormats(ajv);
+const validatorCache = new Map<string, any>(); // key: appId|topic|type -> validate fn
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -216,12 +222,38 @@ app.post("/api/rooms", authMiddleware, (req, res) => {
   res.json({ id, name, topic });
 });
 
+app.post("/api/rooms/admins", authMiddleware, (req, res) => {
+  const roles = (req as any).user.roles as string[];
+  if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
+  const { roomId, userId, action } = req.body || {};
+  if (!roomId || !userId || !action) return res.status(400).json({ error: "roomId, userId, action required" });
+  if (action === 'add') db.prepare("INSERT OR IGNORE INTO room_admins (room_id, user_id) VALUES (?, ?)").run(roomId, userId);
+  if (action === 'remove') db.prepare("DELETE FROM room_admins WHERE room_id = ? AND user_id = ?").run(roomId, userId);
+  res.json({ ok: true });
+});
+
 // Users API (admin)
 app.get("/api/users", authMiddleware, (req, res) => {
   const roles = (req as any).user.roles as string[];
   if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
   const rows = db.prepare("SELECT id, email, display_name, roles, banned FROM users").all();
   res.json(rows.map(r => ({ ...r, roles: JSON.parse(r.roles || "[]") })));
+});
+
+app.post("/api/users/roles", authMiddleware, (req, res) => {
+  const roles = (req as any).user.roles as string[];
+  if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
+  const { userId, add, remove } = req.body || {};
+  if (!userId) return res.status(400).json({ error: "userId required" });
+  const u = db.prepare("SELECT roles FROM users WHERE id = ?").get(userId);
+  if (!u) return res.status(404).json({ error: "user not found" });
+  const r: string[] = JSON.parse(u.roles || "[]");
+  if (Array.isArray(add)) for (const x of add) if (!r.includes(x)) r.push(x);
+  if (Array.isArray(remove)) for (const x of remove) {
+    const i = r.indexOf(x); if (i >= 0) r.splice(i, 1);
+  }
+  db.prepare("UPDATE users SET roles = ? WHERE id = ?").run(JSON.stringify(r), userId);
+  res.json({ ok: true, roles: r });
 });
 
 app.post("/api/users/ban", authMiddleware, (req, res) => {
@@ -351,10 +383,15 @@ io.on("connection", (socket) => {
       if (!messageDef) throw new Error("unknown message type");
       if (messageDef.direction === "subscribe") throw new Error("message is subscribe-only");
 
-      // Validate payload using AJV-compiled JSON schema on-the-fly
+      // Validate payload using cached AJV validator
       const payloadSchema = messageDef.jsonSchema || null;
       if (payloadSchema) {
-        const validate = ajv.compile(payloadSchema);
+        const key = `${msg.appId}|${msg.topic}|${msg.type}`;
+        let validate = validatorCache.get(key);
+        if (!validate) {
+          validate = ajv.compile(payloadSchema);
+          validatorCache.set(key, validate);
+        }
         const valid = validate(msg.payload);
         if (!valid) throw new Error("payload invalid: " + ajv.errorsText(validate.errors));
       }
