@@ -38,7 +38,13 @@ Common commands
 
   - pnpm dev:dashboard (Vite dev server, typically :5173)
   - pnpm build:dashboard (build for production)
-  - pnpm start:dashboard (preview built dashboard)
+  - pnpm preview:dashboard (preview built dashboard)
+
+- Chat Demo commands
+
+  - pnpm dev:chat-demo (Next.js dev server, typically :3000)
+  - pnpm build:chat-demo (build for production)
+  - pnpm start:chat-demo (start production server)
 
 - Build individual packages/apps
 
@@ -92,6 +98,7 @@ High-level architecture and data flow
   - packages/cli: Commander-based CLI for schema lifecycle: init, push (zod -> JSON Schema conversion and POST to server), generate (DTS + optional TS helpers), schema:pull, log.
   - packages/sdk: React provider (SocketMaxProvider) and hook (useMaravianSockets) wrapping socket.io-client with typed helpers and admin methods.
   - apps/dashboard: Vite/React admin UI for login, app management, schema push, room/topic overview, live message stream, and user administration.
+  - apps/chat-demo: Next.js example application demonstrating real-time chat using the SDK and type-safe socket connections.
 
 - Schema pipeline
 
