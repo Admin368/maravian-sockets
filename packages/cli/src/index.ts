@@ -21,7 +21,7 @@ program
     }
     fs.writeFileSync(
       file,
-      `import { z } from 'zod';\nimport { defineSchema } from '@maravian-sockets/types';\n\nexport default defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`
+`import { z } from 'zod';\nimport { defineSchema } from '@maravian/maravian-sockets-types';\n\nexport default defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`
     );
     console.log("Created:", file);
   });

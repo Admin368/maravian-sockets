@@ -45,7 +45,7 @@ node packages/cli/dist/index.js init --out chat-schema.config.ts
 **chat-schema.config.ts:**
 ```typescript
 import { z } from 'zod';
-import { defineSchema } from '@maravian-sockets/types';
+import { defineSchema } from '@maravian/maravian-sockets-types';
 
 export default defineSchema({
   appId: 'chat-demo',

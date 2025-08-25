@@ -10,10 +10,10 @@ importers:
 
   apps/chat-demo:
     dependencies:
-      '@maravian-sockets/sdk':
+      '@maravian/maravian-sockets-sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@maravian-sockets/types':
+      '@maravian/maravian-sockets-types':
         specifier: workspace:*
         version: link:../../packages/types
       next:

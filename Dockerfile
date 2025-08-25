@@ -16,7 +16,7 @@ RUN corepack enable && corepack prepare pnpm@9.7.0 --activate && pnpm install --
 # --- build ---
 FROM deps AS build
 COPY . .
-RUN pnpm -r run build && pnpm --filter @maravian-sockets/dashboard run build
+RUN pnpm -r run build && pnpm --filter @maravian/maravian-sockets-dashboard run build
 
 # Copy dashboard build into server public
 RUN mkdir -p packages/server/public && cp -r apps/dashboard/dist/* packages/server/public/
@@ -30,7 +30,7 @@ ENV NODE_ENV=production
 COPY package.json ./
 COPY pnpm-workspace.yaml ./
 COPY packages/server/package.json ./packages/server/package.json
-RUN corepack enable && corepack prepare pnpm@9.7.0 --activate && pnpm install --filter @maravian-sockets/server --prod --frozen-lockfile=false
+RUN corepack enable && corepack prepare pnpm@9.7.0 --activate && pnpm install --filter @maravian/maravian-sockets-server --prod --frozen-lockfile=false
 
 # Copy built server
 COPY --from=build /app/packages/server/dist ./packages/server/dist

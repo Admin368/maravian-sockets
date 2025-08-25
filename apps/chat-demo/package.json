@@ -1,5 +1,5 @@
 {
-  "name": "@maravian-sockets/chat-demo",
+  "name": "@maravian/maravian-sockets-chat-demo",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,8 +12,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "next": "14.2.18",
-    "@maravian-sockets/sdk": "workspace:*",
-    "@maravian-sockets/types": "workspace:*"
+    "@maravian/maravian-sockets-sdk": "workspace:*",
+    "@maravian/maravian-sockets-types": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.5.4",

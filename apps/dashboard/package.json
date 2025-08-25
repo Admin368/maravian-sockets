@@ -1,5 +1,5 @@
 {
-  "name": "@maravian-sockets/dashboard",
+  "name": "@maravian/maravian-sockets-dashboard",
   "private": true,
   "version": "0.1.0",
   "type": "module",

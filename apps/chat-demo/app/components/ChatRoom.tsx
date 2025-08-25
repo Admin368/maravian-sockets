@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useMaravianSockets } from "@maravian-sockets/sdk";
+import { useMaravianSockets } from "@maravian/maravian-sockets-sdk";
 
 interface Message {
   id: string;

@@ -48,9 +48,9 @@ Common commands
 
 - Build individual packages/apps
 
-  - pnpm --filter @maravian-sockets/sdk run build
-  - pnpm --filter @maravian-sockets/cli run build
-  - pnpm --filter @maravian-sockets/types run build
+  - pnpm --filter @maravian/maravian-sockets-sdk run build
+  - pnpm --filter @maravian/maravian-sockets-cli run build
+  - pnpm --filter @maravian/maravian-sockets-types run build
 
 - Dashboard development setup
 
@@ -61,7 +61,7 @@ Common commands
 
 - CLI (develop and run locally)
 
-  - Build CLI: pnpm --filter @maravian-sockets/cli run build
+  - Build CLI: pnpm --filter @maravian/maravian-sockets-cli run build
   - Run CLI (no publish): node packages/cli/dist/index.js --help
   - Examples:
     - node packages/cli/dist/index.js init --out socketmax.config.ts

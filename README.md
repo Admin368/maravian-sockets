@@ -56,12 +56,12 @@ See apps/dashboard and packages for more details.
 Publishing to npm (for each publishable package)
 
 - Ensure you are logged in: pnpm npm login (or npm login)
-- Set package versions as needed (e.g., 0.1.0) and ensure publishConfig.access is public for scoped packages (@maravian-sockets/\*)
+- Set package versions as needed (e.g., 0.1.0) and ensure publishConfig.access is public for scoped packages (@maravian/\*)
 - Build the workspace: pnpm build
 - From the repo root, publish packages:
-  - pnpm --filter @maravian-sockets/types publish --access public --no-git-checks
-  - pnpm --filter @maravian-sockets/sdk publish --access public --no-git-checks
-  - pnpm --filter @maravian-sockets/cli publish --access public --no-git-checks
+  - pnpm --filter @maravian/maravian-sockets-types publish --access public --no-git-checks
+  - pnpm --filter @maravian/maravian-sockets-sdk publish --access public --no-git-checks
+  - pnpm --filter @maravian/maravian-sockets-cli publish --access public --no-git-checks
   - (Server is typically not published; it ships via Docker.)
 - Tag versions in git if you like: git tag -a v0.1.0 -m "v0.1.0" && git push --tags
 
@@ -82,13 +82,13 @@ Local development guide (Windows-friendly)
 - Build the dashboard (served by server):
   - pnpm build:dashboard
 - Use the CLI locally without publishing:
-  - Build CLI: pnpm --filter @maravian-sockets/cli run build
+  - Build CLI: pnpm --filter @maravian/maravian-sockets-cli run build
   - Execute via ts-node (dev):
-    - pnpm --filter @maravian-sockets/cli exec node dist/index.js --help
+    - pnpm --filter @maravian/maravian-sockets-cli exec node dist/index.js --help
   - Or create a local global link (optional):
-    - pnpm --filter @maravian-sockets/cli link -g (then run `maravian-sockets --help`)
+    - pnpm --filter @maravian/maravian-sockets-cli link -g (then run `maravian-sockets --help`)
 - Use SDK locally in another project without publishing:
-  - In this repo: pnpm --filter @maravian-sockets/sdk build
+  - In this repo: pnpm --filter @maravian/maravian-sockets-sdk build
   - In your other project: pnpm add link:"C:\\\_ GITHUB\\socket_server_max\\packages\\sdk"
 - Troubleshooting better-sqlite3 native build:
   - Prefer Docker for the server if local node-gyp toolchain isnt available.
@@ -104,6 +104,6 @@ FAQ
 - Q: npm install at the root fails with workspace install scripts?  
   A: We now use pnpm; run `pnpm install` at the root. Each package has no install script, only build. Root scripts use pnpm and avoid invalid `-ws` flags and `true` on Windows.
 - Q: How do I test the CLI without publishing?  
-  A: Build the CLI then run: `node packages/cli/dist/index.js --help`, or globally link the package with `pnpm --filter @maravian-sockets/cli link -g`.
+  A: Build the CLI then run: `node packages/cli/dist/index.js --help`, or globally link the package with `pnpm --filter @maravian/maravian-sockets-cli link -g`.
 - Q: How do I consume the SDK locally?  
   A: Use pnpm link or `pnpm add link:"<absolute path to packages/sdk>"` in your consumer app.

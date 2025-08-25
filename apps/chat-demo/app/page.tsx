@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SocketMaxProvider } from "@maravian-sockets/sdk";
+import { SocketMaxProvider } from "@maravian/maravian-sockets-sdk";
 import { ChatRoom } from "./components/ChatRoom";
 import { ConnectionForm } from "./components/ConnectionForm";
 
