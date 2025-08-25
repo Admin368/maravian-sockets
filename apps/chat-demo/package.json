@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "socket_schema:create": "npx @maravian/maravian-sockets-cli init --out chat-schema.config.ts",
+    "socket_schema:push": "npx @maravian/maravian-sockets-cli push --config ./chat-schema.config.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

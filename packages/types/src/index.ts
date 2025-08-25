@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+// Re-export z for convenience so users don't need to install zod separately
+export { z };
+
 // Core primitives for the schema DSL
 export const messageSchema = <T extends z.ZodTypeAny>(payload: T) =>
   z.object({

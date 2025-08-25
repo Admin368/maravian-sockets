@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import { defineSchema } from '@maravian/maravian-sockets-types';
+import { z, defineSchema } from '@maravian/maravian-sockets-types';
 
 export default defineSchema({
   appId: 'my-app',

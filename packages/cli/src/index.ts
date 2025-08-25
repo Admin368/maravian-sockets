@@ -21,7 +21,7 @@ program
     }
     fs.writeFileSync(
       file,
-`import { z } from 'zod';\nimport { defineSchema } from '@maravian/maravian-sockets-types';\n\nexport default defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`
+      `import { z, defineSchema } from '@maravian/maravian-sockets-types';\n\nexport default defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`
     );
     console.log("Created:", file);
   });
@@ -29,11 +29,20 @@ program
 program
   .command("push")
   .description("push schema to server")
-  .requiredOption("--server <url>")
-  .requiredOption("--app-id <id>")
-  .requiredOption("--app-key <key>")
+  .option("--server <url>", "server URL", "http://localhost:8080")
+  .option("--app-id <id>", "application ID")
+  .option("--app-key <key>", "application key")
   .requiredOption("--config <file>")
   .action(async (opts) => {
+    // Prompt for missing required fields
+    if (!opts.appId) {
+      process.stdout.write("App ID: ");
+      opts.appId = await readInput();
+    }
+    if (!opts.appKey) {
+      process.stdout.write("App Key: ");
+      opts.appKey = await readInput();
+    }
     const configPath = path.resolve(process.cwd(), opts.config);
     if (!fs.existsSync(configPath)) {
       console.error("Config not found:", configPath);
@@ -41,7 +50,7 @@ program
     }
     // Load TS/JS module
     let schema;
-    if (configPath.endsWith('.js')) {
+    if (configPath.endsWith(".js")) {
       // Handle JS files directly
       schema = require(configPath);
     } else {
@@ -165,6 +174,15 @@ program.parseAsync().catch((e) => {
   console.error(e);
   process.exit(1);
 });
+
+// Helper function to read user input
+function readInput(): Promise<string> {
+  return new Promise((resolve) => {
+    process.stdin.once("data", (data) => {
+      resolve(data.toString().trim());
+    });
+  });
+}
 
 // Minimal zod -> json schema converter (very partial)
 function zodToJson(z: any): { schema: any; optional?: boolean } {
