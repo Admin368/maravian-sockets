@@ -16,6 +16,7 @@ A live chat application built with Next.js that demonstrates the power of Maravi
 ### 1. Start the Maravian Sockets Server
 
 From the repository root:
+
 ```bash
 pnpm dev
 ```
@@ -37,41 +38,42 @@ Use the CLI to create and push a chat schema:
 
 ```bash
 # Create schema config
-node packages/cli/dist/index.js init --out chat-schema.config.ts
+npx @maravian/maravian-sockets-cli init --out chat-schema.config.ts
 
 # Edit the config to define chat messages:
 ```
 
 **chat-schema.config.ts:**
+
 ```typescript
-import { z } from 'zod';
-import { defineSchema } from '@maravian/maravian-sockets-types';
+import { z } from "zod";
+import { defineSchema } from "@maravian/maravian-sockets-types";
 
 export default defineSchema({
-  appId: 'chat-demo',
+  appId: "chat-demo",
   version: new Date().toISOString(),
   topics: [
     {
-      topic: 'chat.messages',
-      description: 'Chat messages topic',
+      topic: "chat.messages",
+      description: "Chat messages topic",
       messages: [
-        { 
-          name: 'message', 
-          direction: 'publish', 
-          payload: z.object({ 
-            username: z.string(), 
-            text: z.string() 
-          }) 
-        }
-      ]
-    }
-  ]
+        {
+          name: "message",
+          direction: "publish",
+          payload: z.object({
+            username: z.string(),
+            text: z.string(),
+          }),
+        },
+      ],
+    },
+  ],
 });
 ```
 
 ```bash
 # Push schema to server
-node packages/cli/dist/index.js push --server http://localhost:8080 --app-id chat-demo --app-key YOUR_APP_KEY --config ./chat-schema.config.ts
+npx @maravian/maravian-sockets-cli push --server http://localhost:8080 --app-id chat-demo --app-key YOUR_APP_KEY --config ./chat-schema.config.ts
 ```
 
 ### 4. Run the Chat Demo
@@ -116,7 +118,7 @@ Visit http://localhost:3000 and start chatting!
 ### Available Scripts
 
 - `pnpm dev`: Start development server
-- `pnpm build`: Build for production  
+- `pnpm build`: Build for production
 - `pnpm start`: Start production server
 - `pnpm lint`: Run ESLint
 

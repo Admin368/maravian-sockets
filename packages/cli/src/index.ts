@@ -39,10 +39,17 @@ program
       console.error("Config not found:", configPath);
       process.exit(1);
     }
-    // Load TS module with ts-node
-    require("ts-node").register({ transpileOnly: true });
-    const mod = await import(configPath);
-    const schema = mod.default || mod.schema || mod;
+    // Load TS/JS module
+    let schema;
+    if (configPath.endsWith('.js')) {
+      // Handle JS files directly
+      schema = require(configPath);
+    } else {
+      // Handle TS files with ts-node
+      require("ts-node").register({ transpileOnly: true });
+      const mod = await import(configPath);
+      schema = mod.default || mod.schema || mod;
+    }
     // serialize Zod payloads into JSON Schema per message
     const jsonSchema = {
       appId: schema.appId,

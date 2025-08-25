@@ -10,6 +10,9 @@ importers:
 
   apps/chat-demo:
     dependencies:
+      '@maravian/maravian-sockets-cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
       '@maravian/maravian-sockets-sdk':
         specifier: workspace:*
         version: link:../../packages/sdk

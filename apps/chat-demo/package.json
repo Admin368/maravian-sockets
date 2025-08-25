@@ -13,6 +13,7 @@
     "react-dom": "^18.3.1",
     "next": "14.2.18",
     "@maravian/maravian-sockets-sdk": "workspace:*",
+    "@maravian/maravian-sockets-cli": "workspace:*",
     "@maravian/maravian-sockets-types": "workspace:*"
   },
   "devDependencies": {
