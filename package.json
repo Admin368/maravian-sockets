@@ -1,5 +1,5 @@
 {
-  "name": "socket-max",
+  "name": "maravian-sockets",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -9,9 +9,9 @@
   "scripts": {
     "install": "npm run -ws install || true",
     "build": "npm run -ws build",
-    "dev:server": "npm run -w @socket-max/server dev",
-    "build:dashboard": "npm run -w @socket-max/dashboard build",
-    "start": "npm run -w @socket-max/server start",
+    "dev:server": "npm run -w @maravian-sockets/server dev",
+    "build:dashboard": "npm run -w @maravian-sockets/dashboard build",
+    "start": "npm run -w @maravian-sockets/server start",
     "format": "node -e \"console.log('format placeholder')\""
   },
   "engines": {

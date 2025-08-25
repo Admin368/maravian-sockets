@@ -1,5 +1,5 @@
 {
-  "name": "@socket-max/sdk",
+  "name": "@maravian-sockets/sdk",
   "version": "0.1.0",
   "private": false,
   "type": "commonjs",
@@ -20,4 +20,3 @@
     "react-dom": ">=17"
   }
 }
-

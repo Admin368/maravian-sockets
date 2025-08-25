@@ -1,5 +1,5 @@
 {
-  "name": "@socket-max/server",
+  "name": "@maravian-sockets/server",
   "version": "0.1.0",
   "private": false,
   "type": "commonjs",
@@ -32,4 +32,3 @@
     "typescript": "^5.5.4"
   }
 }
-

@@ -12,7 +12,8 @@ import fs from "fs";
 
 const PORT = Number(process.env.PORT || 8080);
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
-const DB_PATH = process.env.DB_PATH || path.resolve(process.cwd(), "data", "socketmax.db");
+const DB_PATH =
+  process.env.DB_PATH || path.resolve(process.cwd(), "data", "socketmax.db");
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 
 // Ensure data directory exists
@@ -82,13 +83,16 @@ CREATE TABLE IF NOT EXISTS messages (
 const adminEmail = process.env.ADMIN_EMAIL;
 const adminPassword = process.env.ADMIN_PASSWORD;
 if (adminEmail && adminPassword) {
-  const row = db.prepare("SELECT id FROM users WHERE email = ?").get(adminEmail);
+  const row = db
+    .prepare("SELECT id FROM users WHERE email = ?")
+    .get(adminEmail);
   if (!row) {
     const bcrypt = require("bcryptjs");
     const id = nanoid();
     const password_hash = bcrypt.hashSync(adminPassword, 10);
-    db.prepare("INSERT INTO users (id, email, password_hash, roles) VALUES (?, ?, ?, ?)")
-      .run(id, adminEmail, password_hash, JSON.stringify(["admin"]));
+    db.prepare(
+      "INSERT INTO users (id, email, password_hash, roles) VALUES (?, ?, ?, ?)"
+    ).run(id, adminEmail, password_hash, JSON.stringify(["admin"]));
     console.log(`Bootstrapped admin user: ${adminEmail}`);
   }
 }
@@ -99,16 +103,22 @@ const validatorCache = new Map<string, any>(); // key: appId|topic|type -> valid
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
-app.use(cors({ origin: CORS_ORIGIN === "*" ? true : CORS_ORIGIN, credentials: true }));
+app.use(
+  cors({ origin: CORS_ORIGIN === "*" ? true : CORS_ORIGIN, credentials: true })
+);
 
 const httpServer = createServer(app);
 const io = new IOServer(httpServer, {
-  cors: { origin: CORS_ORIGIN === "*" ? true : CORS_ORIGIN }
+  cors: { origin: CORS_ORIGIN === "*" ? true : CORS_ORIGIN },
 });
 
 // Auth helpers
 function signToken(user: any) {
-  return jwt.sign({ sub: user.id, roles: JSON.parse(user.roles || "[]") }, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(
+    { sub: user.id, roles: JSON.parse(user.roles || "[]") },
+    JWT_SECRET,
+    { expiresIn: "7d" }
+  );
 }
 
 function authMiddleware(req: any, res: any, next: any) {
@@ -131,24 +141,32 @@ app.get("/api/health", (req, res) => {
 
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: "email/password required" });
+  if (!email || !password)
+    return res.status(400).json({ error: "email/password required" });
   const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
   if (!user) return res.status(401).json({ error: "invalid credentials" });
   const bcrypt = require("bcryptjs");
-  if (!bcrypt.compareSync(password, user.password_hash)) return res.status(401).json({ error: "invalid credentials" });
+  if (!bcrypt.compareSync(password, user.password_hash))
+    return res.status(401).json({ error: "invalid credentials" });
   const token = signToken(user);
-  res.json({ accessToken: token, user: { id: user.id, email: user.email, roles: JSON.parse(user.roles) } });
+  res.json({
+    accessToken: token,
+    user: { id: user.id, email: user.email, roles: JSON.parse(user.roles) },
+  });
 });
 
 // App key create/list (admin only)
 app.post("/api/apps", authMiddleware, (req, res) => {
   const roles = (req as any).user.roles as string[];
-  if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
+  if (!roles.includes("admin"))
+    return res.status(403).json({ error: "forbidden" });
   const { appId, name } = req.body || {};
   if (!appId) return res.status(400).json({ error: "appId required" });
   const appKey = nanoid(32);
   try {
-    db.prepare("INSERT INTO apps (app_id, app_key, name, created_at) VALUES (?, ?, ?, ?)").run(appId, appKey, name || appId, Date.now());
+    db.prepare(
+      "INSERT INTO apps (app_id, app_key, name, created_at) VALUES (?, ?, ?, ?)"
+    ).run(appId, appKey, name || appId, Date.now());
     res.json({ appId, appKey });
   } catch (e: any) {
     res.status(400).json({ error: e.message });
@@ -157,7 +175,8 @@ app.post("/api/apps", authMiddleware, (req, res) => {
 
 app.get("/api/apps", authMiddleware, (req, res) => {
   const roles = (req as any).user.roles as string[];
-  if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
+  if (!roles.includes("admin"))
+    return res.status(403).json({ error: "forbidden" });
   const rows = db.prepare("SELECT app_id, name, created_at FROM apps").all();
   res.json(rows);
 });
@@ -165,18 +184,32 @@ app.get("/api/apps", authMiddleware, (req, res) => {
 // Schema push
 app.post("/api/schema/push", (req, res) => {
   const { appId, appKey, version, schema } = req.body || {};
-  if (!appId || !appKey || !version || !schema) return res.status(400).json({ error: "appId, appKey, version, schema required" });
+  if (!appId || !appKey || !version || !schema)
+    return res
+      .status(400)
+      .json({ error: "appId, appKey, version, schema required" });
   const appRow = db.prepare("SELECT * FROM apps WHERE app_id = ?").get(appId);
-  if (!appRow || appRow.app_key !== appKey) return res.status(401).json({ error: "invalid app credentials" });
+  if (!appRow || appRow.app_key !== appKey)
+    return res.status(401).json({ error: "invalid app credentials" });
   const id = nanoid();
-  db.prepare("INSERT INTO schemas (id, app_id, version, json, created_at) VALUES (?, ?, ?, ?, ?)")
-    .run(id, appId, version, JSON.stringify(schema), Date.now());
+  db.prepare(
+    "INSERT INTO schemas (id, app_id, version, json, created_at) VALUES (?, ?, ?, ?, ?)"
+  ).run(id, appId, version, JSON.stringify(schema), Date.now());
 
   // load topics
   if (Array.isArray(schema.topics)) {
-    const insert = db.prepare("INSERT OR IGNORE INTO topics (id, app_id, topic, description, system, created_at) VALUES (?, ?, ?, ?, ?, ?)");
+    const insert = db.prepare(
+      "INSERT OR IGNORE INTO topics (id, app_id, topic, description, system, created_at) VALUES (?, ?, ?, ?, ?, ?)"
+    );
     for (const t of schema.topics) {
-      insert.run(nanoid(), appId, t.topic, t.description || null, t.system ? 1 : 0, Date.now());
+      insert.run(
+        nanoid(),
+        appId,
+        t.topic,
+        t.description || null,
+        t.system ? 1 : 0,
+        Date.now()
+      );
     }
   }
   res.json({ ok: true, id });
@@ -186,14 +219,22 @@ app.post("/api/schema/push", (req, res) => {
 app.get("/api/schema/versions", (req, res) => {
   const { appId } = req.query as any;
   if (!appId) return res.status(400).json({ error: "appId required" });
-  const rows = db.prepare("SELECT id, version, created_at FROM schemas WHERE app_id = ? ORDER BY created_at DESC").all(appId);
+  const rows = db
+    .prepare(
+      "SELECT id, version, created_at FROM schemas WHERE app_id = ? ORDER BY created_at DESC"
+    )
+    .all(appId);
   res.json(rows);
 });
 
 app.get("/api/schema/latest", (req, res) => {
   const { appId } = req.query as any;
   if (!appId) return res.status(400).json({ error: "appId required" });
-  const row = db.prepare("SELECT json FROM schemas WHERE app_id = ? ORDER BY created_at DESC LIMIT 1").get(appId);
+  const row = db
+    .prepare(
+      "SELECT json FROM schemas WHERE app_id = ? ORDER BY created_at DESC LIMIT 1"
+    )
+    .get(appId);
   if (!row) return res.status(404).json({ error: "no schema" });
   res.json(JSON.parse(row.json));
 });
@@ -202,66 +243,96 @@ app.get("/api/schema/latest", (req, res) => {
 app.get("/api/topics", (req, res) => {
   const { appId } = req.query as any;
   if (!appId) return res.status(400).json({ error: "appId required" });
-  const rows = db.prepare("SELECT topic, description, system, created_at FROM topics WHERE app_id = ?").all(appId);
+  const rows = db
+    .prepare(
+      "SELECT topic, description, system, created_at FROM topics WHERE app_id = ?"
+    )
+    .all(appId);
   res.json(rows);
 });
 
 app.get("/api/rooms", (req, res) => {
   const { appId } = req.query as any;
   if (!appId) return res.status(400).json({ error: "appId required" });
-  const rows = db.prepare("SELECT id, name, topic, created_at FROM rooms WHERE app_id = ?").all(appId);
+  const rows = db
+    .prepare("SELECT id, name, topic, created_at FROM rooms WHERE app_id = ?")
+    .all(appId);
   res.json(rows);
 });
 
 app.post("/api/rooms", authMiddleware, (req, res) => {
   const { appId, name, topic } = req.body || {};
-  if (!appId || !name || !topic) return res.status(400).json({ error: "appId, name, topic required" });
+  if (!appId || !name || !topic)
+    return res.status(400).json({ error: "appId, name, topic required" });
   const id = nanoid();
-  db.prepare("INSERT INTO rooms (id, name, topic, app_id, created_at) VALUES (?, ?, ?, ?, ?)")
-    .run(id, name, topic, appId, Date.now());
+  db.prepare(
+    "INSERT INTO rooms (id, name, topic, app_id, created_at) VALUES (?, ?, ?, ?, ?)"
+  ).run(id, name, topic, appId, Date.now());
   res.json({ id, name, topic });
 });
 
 app.post("/api/rooms/admins", authMiddleware, (req, res) => {
   const roles = (req as any).user.roles as string[];
-  if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
+  if (!roles.includes("admin"))
+    return res.status(403).json({ error: "forbidden" });
   const { roomId, userId, action } = req.body || {};
-  if (!roomId || !userId || !action) return res.status(400).json({ error: "roomId, userId, action required" });
-  if (action === 'add') db.prepare("INSERT OR IGNORE INTO room_admins (room_id, user_id) VALUES (?, ?)").run(roomId, userId);
-  if (action === 'remove') db.prepare("DELETE FROM room_admins WHERE room_id = ? AND user_id = ?").run(roomId, userId);
+  if (!roomId || !userId || !action)
+    return res.status(400).json({ error: "roomId, userId, action required" });
+  if (action === "add")
+    db.prepare(
+      "INSERT OR IGNORE INTO room_admins (room_id, user_id) VALUES (?, ?)"
+    ).run(roomId, userId);
+  if (action === "remove")
+    db.prepare("DELETE FROM room_admins WHERE room_id = ? AND user_id = ?").run(
+      roomId,
+      userId
+    );
   res.json({ ok: true });
 });
 
 // Users API (admin)
 app.get("/api/users", authMiddleware, (req, res) => {
   const roles = (req as any).user.roles as string[];
-  if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
-  const rows = db.prepare("SELECT id, email, display_name, roles, banned FROM users").all();
-  res.json(rows.map(r => ({ ...r, roles: JSON.parse(r.roles || "[]") })));
+  if (!roles.includes("admin"))
+    return res.status(403).json({ error: "forbidden" });
+  const rows = db
+    .prepare("SELECT id, email, display_name, roles, banned FROM users")
+    .all();
+  res.json(rows.map((r) => ({ ...r, roles: JSON.parse(r.roles || "[]") })));
 });
 
 app.post("/api/users/roles", authMiddleware, (req, res) => {
   const roles = (req as any).user.roles as string[];
-  if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
+  if (!roles.includes("admin"))
+    return res.status(403).json({ error: "forbidden" });
   const { userId, add, remove } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId required" });
   const u = db.prepare("SELECT roles FROM users WHERE id = ?").get(userId);
   if (!u) return res.status(404).json({ error: "user not found" });
   const r: string[] = JSON.parse(u.roles || "[]");
   if (Array.isArray(add)) for (const x of add) if (!r.includes(x)) r.push(x);
-  if (Array.isArray(remove)) for (const x of remove) {
-    const i = r.indexOf(x); if (i >= 0) r.splice(i, 1);
-  }
-  db.prepare("UPDATE users SET roles = ? WHERE id = ?").run(JSON.stringify(r), userId);
+  if (Array.isArray(remove))
+    for (const x of remove) {
+      const i = r.indexOf(x);
+      if (i >= 0) r.splice(i, 1);
+    }
+  db.prepare("UPDATE users SET roles = ? WHERE id = ?").run(
+    JSON.stringify(r),
+    userId
+  );
   res.json({ ok: true, roles: r });
 });
 
 app.post("/api/users/ban", authMiddleware, (req, res) => {
   const roles = (req as any).user.roles as string[];
-  if (!roles.includes("admin")) return res.status(403).json({ error: "forbidden" });
+  if (!roles.includes("admin"))
+    return res.status(403).json({ error: "forbidden" });
   const { userId, banned } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId required" });
-  db.prepare("UPDATE users SET banned = ? WHERE id = ?").run(banned ? 1 : 0, userId);
+  db.prepare("UPDATE users SET banned = ? WHERE id = ?").run(
+    banned ? 1 : 0,
+    userId
+  );
   res.json({ ok: true });
 });
 
@@ -274,12 +345,23 @@ app.get("/api/messages", (req, res) => {
   const { appId, topic, room, limit } = req.query as any;
   if (!appId) return res.status(400).json({ error: "appId required" });
   const lim = Math.min(Number(limit || 100), 500);
-  let sql = "SELECT topic, type, payload, user_id, room, ts FROM messages WHERE app_id = ?";
+  let sql =
+    "SELECT topic, type, payload, user_id, room, ts FROM messages WHERE app_id = ?";
   const params: any[] = [appId];
-  if (topic) { sql += " AND topic = ?"; params.push(topic); }
-  if (room) { sql += " AND room = ?"; params.push(room); }
-  sql += " ORDER BY ts DESC LIMIT ?"; params.push(lim);
-  const rows = db.prepare(sql).all(...params).map((r: any) => ({ ...r, payload: JSON.parse(r.payload) }));
+  if (topic) {
+    sql += " AND topic = ?";
+    params.push(topic);
+  }
+  if (room) {
+    sql += " AND room = ?";
+    params.push(room);
+  }
+  sql += " ORDER BY ts DESC LIMIT ?";
+  params.push(lim);
+  const rows = db
+    .prepare(sql)
+    .all(...params)
+    .map((r: any) => ({ ...r, payload: JSON.parse(r.payload) }));
   res.json(rows);
 });
 
@@ -289,11 +371,14 @@ app.use(express.static(publicDir));
 app.get("*", (req, res) => {
   const indexPath = path.join(publicDir, "index.html");
   if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
-  res.status(200).send("Socket Max server");
+  res.status(200).send("Maravian Sockets server");
 });
 
 // Socket.IO events
-const connectedUsers = new Map<string, { socketId: string; userId?: string; appId?: string }>();
+const connectedUsers = new Map<
+  string,
+  { socketId: string; userId?: string; appId?: string }
+>();
 
 io.on("connection", (socket) => {
   const token = socket.handshake.auth?.token as string | undefined;
@@ -308,7 +393,10 @@ io.on("connection", (socket) => {
   if (userId) {
     const u = db.prepare("SELECT banned FROM users WHERE id = ?").get(userId);
     if (u && u.banned) {
-      socket.emit("system.connection", { type: "status", payload: { status: "disconnected", reason: "banned" } });
+      socket.emit("system.connection", {
+        type: "status",
+        payload: { status: "disconnected", reason: "banned" },
+      });
       return socket.disconnect(true);
     }
   }
@@ -316,14 +404,19 @@ io.on("connection", (socket) => {
   connectedUsers.set(socket.id, { socketId: socket.id, userId, appId });
 
   // Connection status to this socket
-  socket.emit("system.connection", { type: "status", payload: { status: "connected" } });
+  socket.emit("system.connection", {
+    type: "status",
+    payload: { status: "connected" },
+  });
 
   // Presence join broadcast
   io.emit("system.presence", {
     type: "user.join",
     payload: {
       user: { id: userId || socket.id },
-      users: Array.from(connectedUsers.values()).map((u) => ({ id: u.userId || u.socketId })),
+      users: Array.from(connectedUsers.values()).map((u) => ({
+        id: u.userId || u.socketId,
+      })),
     },
   });
 
@@ -333,10 +426,15 @@ io.on("connection", (socket) => {
       type: "user.leave",
       payload: {
         userId: userId || socket.id,
-        users: Array.from(connectedUsers.values()).map((u) => ({ id: u.userId || u.socketId })),
+        users: Array.from(connectedUsers.values()).map((u) => ({
+          id: u.userId || u.socketId,
+        })),
       },
     });
-    io.emit("system.connection", { type: "status", payload: { status: "disconnected", userId: userId || socket.id } });
+    io.emit("system.connection", {
+      type: "status",
+      payload: { status: "disconnected", userId: userId || socket.id },
+    });
   });
 
   // Join/leave rooms
@@ -358,7 +456,9 @@ io.on("connection", (socket) => {
       if (!target) throw new Error("userId required");
       db.prepare("UPDATE users SET banned = 1 WHERE id = ?").run(target);
       cb && cb({ ok: true });
-    } catch (e: any) { cb && cb({ ok: false, error: e.message }); }
+    } catch (e: any) {
+      cb && cb({ ok: false, error: e.message });
+    }
   });
   socket.on("admin.unban", ({ userId: target }, cb?: Function) => {
     try {
@@ -366,22 +466,30 @@ io.on("connection", (socket) => {
       if (!target) throw new Error("userId required");
       db.prepare("UPDATE users SET banned = 0 WHERE id = ?").run(target);
       cb && cb({ ok: true });
-    } catch (e: any) { cb && cb({ ok: false, error: e.message }); }
+    } catch (e: any) {
+      cb && cb({ ok: false, error: e.message });
+    }
   });
 
   // Publish messages
   socket.on("publish", (msg: any, cb?: Function) => {
     try {
       // msg: { appId, topic, type, payload, room? }
-      if (!msg || !msg.appId || !msg.topic || !msg.type) throw new Error("invalid message");
-      const schemaRow = db.prepare("SELECT json FROM schemas WHERE app_id = ? ORDER BY created_at DESC LIMIT 1").get(msg.appId);
+      if (!msg || !msg.appId || !msg.topic || !msg.type)
+        throw new Error("invalid message");
+      const schemaRow = db
+        .prepare(
+          "SELECT json FROM schemas WHERE app_id = ? ORDER BY created_at DESC LIMIT 1"
+        )
+        .get(msg.appId);
       if (!schemaRow) throw new Error("no schema for app");
       const schema = JSON.parse(schemaRow.json);
       const topic = schema.topics.find((t: any) => t.topic === msg.topic);
       if (!topic) throw new Error("unknown topic");
       const messageDef = topic.messages.find((m: any) => m.name === msg.type);
       if (!messageDef) throw new Error("unknown message type");
-      if (messageDef.direction === "subscribe") throw new Error("message is subscribe-only");
+      if (messageDef.direction === "subscribe")
+        throw new Error("message is subscribe-only");
 
       // Validate payload using cached AJV validator
       const payloadSchema = messageDef.jsonSchema || null;
@@ -393,7 +501,10 @@ io.on("connection", (socket) => {
           validatorCache.set(key, validate);
         }
         const valid = validate(msg.payload);
-        if (!valid) throw new Error("payload invalid: " + ajv.errorsText(validate.errors));
+        if (!valid)
+          throw new Error(
+            "payload invalid: " + ajv.errorsText(validate.errors)
+          );
       }
 
       const rec = {
@@ -406,12 +517,22 @@ io.on("connection", (socket) => {
         room: msg.room || null,
         ts: Date.now(),
       };
-      db.prepare("INSERT INTO messages (id, app_id, topic, type, payload, user_id, room, ts) VALUES (@id, @app_id, @topic, @type, @payload, @user_id, @room, @ts)").run(rec);
+      db.prepare(
+        "INSERT INTO messages (id, app_id, topic, type, payload, user_id, room, ts) VALUES (@id, @app_id, @topic, @type, @payload, @user_id, @room, @ts)"
+      ).run(rec);
 
       if (msg.room) {
-        io.to(msg.room).emit(msg.topic, { type: msg.type, payload: msg.payload, ts: rec.ts });
+        io.to(msg.room).emit(msg.topic, {
+          type: msg.type,
+          payload: msg.payload,
+          ts: rec.ts,
+        });
       } else {
-        io.emit(msg.topic, { type: msg.type, payload: msg.payload, ts: rec.ts });
+        io.emit(msg.topic, {
+          type: msg.type,
+          payload: msg.payload,
+          ts: rec.ts,
+        });
       }
       cb && cb({ ok: true });
     } catch (e: any) {
@@ -421,6 +542,5 @@ io.on("connection", (socket) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`Socket Max server listening on :${PORT}`);
+  console.log(`Maravian Sockets server listening on :${PORT}`);
 });
-

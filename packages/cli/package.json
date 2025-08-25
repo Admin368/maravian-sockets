@@ -1,10 +1,10 @@
 {
-  "name": "@socket-max/cli",
+  "name": "@maravian-sockets/cli",
   "version": "0.1.0",
   "private": false,
   "type": "commonjs",
   "bin": {
-    "socket-max": "dist/index.js"
+    "maravian-sockets": "dist/index.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,4 +22,3 @@
     "typescript": "^5.5.4"
   }
 }
-

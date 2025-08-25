@@ -1,8 +1,9 @@
-# Socket Max
+# Maravian Sockets
 
-Socket Max is a docker-deployable, type-safe socket server with a techy dashboard, a TypeScript schema DSL, a React SDK (useSocketMax hook), and a CLI for schema push/generate/pull.
+Maravian Sockets is a docker-deployable, type-safe socket server with a techy dashboard, a TypeScript schema DSL, a React SDK (useSocketMax hook), and a CLI for schema push/generate/pull.
 
 Highlights:
+
 - Typesafe topics and message schemas (Zod/JSON Schema)
 - Express + Socket.IO server with SQLite persistence
 - Dashboard UI for auth, topics, rooms, users, live message stream & filters
@@ -12,24 +13,30 @@ Highlights:
 
 ## Quickstart
 
-1) Install deps (workspace root):
-- npm install
+1. Install deps (workspace root):
 
-2) Build all packages:
-- npm run build
+- pnpm install
 
-3) Dev server:
-- npm run dev:server
+2. Build all packages:
 
-4) Build Dashboard:
-- npm run build:dashboard
+- pnpm run build
 
-5) Docker (from repo root):
+3. Dev server:
+
+- pnpm run dev:server
+
+4. Build Dashboard:
+
+- pnpm run build:dashboard
+
+5. Docker (from repo root):
+
 - docker compose up --build -d
 
 Server runs on http://localhost:8080 and serves the Dashboard at `/`.
 
 Environment variables (Docker or local):
+
 - PORT: default 8080
 - JWT_SECRET: secret for issuing JWTs
 - ADMIN_EMAIL / ADMIN_PASSWORD: bootstrap admin
@@ -37,8 +44,9 @@ Environment variables (Docker or local):
 - CORS_ORIGIN: allowed origin (e.g. http://localhost:5173)
 
 CLI usage example (after `npm install`):
-- npx socket-max init
-- npx socket-max push --config ./socketmax.config.ts --server http://localhost:8080 --app-id myapp --app-key {{APP_KEY}}
-- npx socket-max generate --server http://localhost:8080 --app-id myapp --out ./socket-max.generated.d.ts
+
+- npx maravian-sockets init
+- npx maravian-sockets push --config ./socketmax.config.ts --server http://localhost:8080 --app-id myapp --app-key {{APP_KEY}}
+- npx maravian-sockets generate --server http://localhost:8080 --app-id myapp --out ./maravian-sockets.generated.d.ts
 
 See apps/dashboard and packages for more details.
