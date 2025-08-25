@@ -1,6 +1,6 @@
 # Maravian Sockets
 
-Maravian Sockets is a docker-deployable, type-safe socket server with a techy dashboard, a TypeScript schema DSL, a React SDK (useSocketMax hook), and a CLI for schema push/generate/pull.
+Maravian Sockets is a docker-deployable, type-safe socket server with a dashboard, a TypeScript schema DSL, a React SDK (useMaravianSockets hook), and a CLI for schema push/generate/pull.
 
 Highlights:
 
@@ -54,8 +54,9 @@ See apps/dashboard and packages for more details.
 ---
 
 Publishing to npm (for each publishable package)
+
 - Ensure you are logged in: pnpm npm login (or npm login)
-- Set package versions as needed (e.g., 0.1.0) and ensure publishConfig.access is public for scoped packages (@maravian-sockets/*)
+- Set package versions as needed (e.g., 0.1.0) and ensure publishConfig.access is public for scoped packages (@maravian-sockets/\*)
 - Build the workspace: pnpm build
 - From the repo root, publish packages:
   - pnpm --filter @maravian-sockets/types publish --access public --no-git-checks
@@ -65,10 +66,12 @@ Publishing to npm (for each publishable package)
 - Tag versions in git if you like: git tag -a v0.1.0 -m "v0.1.0" && git push --tags
 
 Notes:
+
 - If you encounter 403 or 404, verify your npm scope permissions and that the package name is unused.
 - You can set registry per scope if you use a private registry.
 
 Local development guide (Windows-friendly)
+
 - Requirements: Node 20.x, pnpm (corepack enable && corepack prepare pnpm@9.7.0 --activate), Git, optional Docker.
 - Install deps:
   - pnpm install
@@ -83,19 +86,21 @@ Local development guide (Windows-friendly)
   - Execute via ts-node (dev):
     - pnpm --filter @maravian-sockets/cli exec node dist/index.js --help
   - Or create a local global link (optional):
-    - pnpm --filter @maravian-sockets/cli link -g  (then run `maravian-sockets --help`)
+    - pnpm --filter @maravian-sockets/cli link -g (then run `maravian-sockets --help`)
 - Use SDK locally in another project without publishing:
   - In this repo: pnpm --filter @maravian-sockets/sdk build
-  - In your other project: pnpm add link:"C:\\_ GITHUB\\socket_server_max\\packages\\sdk"
+  - In your other project: pnpm add link:"C:\\\_ GITHUB\\socket_server_max\\packages\\sdk"
 - Troubleshooting better-sqlite3 native build:
   - Prefer Docker for the server if local node-gyp toolchain isnt available.
   - Otherwise install Visual Studio Build Tools (Desktop development with C++) for node-gyp.
 
 Docker dev
+
 - docker compose up --build -d
 - Visit http://localhost:8080
 
 FAQ
+
 - Q: npm install at the root fails with workspace install scripts?  
   A: We now use pnpm; run `pnpm install` at the root. Each package has no install script, only build. Root scripts use pnpm and avoid invalid `-ws` flags and `true` on Windows.
 - Q: How do I test the CLI without publishing?  
