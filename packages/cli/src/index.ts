@@ -2,6 +2,10 @@
 import { Command } from "commander";
 import path from "path";
 import fs from "fs";
+import dotenv from "dotenv";
+
+// Load .env file from current working directory
+dotenv.config();
 
 const program = new Command();
 program
@@ -38,7 +42,27 @@ program
   .option("--app-key <key>", "application key")
   .requiredOption("--config <file>")
   .action(async (opts) => {
-    // Prompt for missing required fields
+    // Get app ID from CLI option, environment variable, or prompt
+    if (!opts.appId) {
+      opts.appId = process.env.MSOCKET_APP_ID;
+    }
+    if (!opts.appKey) {
+      opts.appKey = process.env.MSOCKET_APP_KEY;
+    }
+    
+    // If still missing, check if .env file exists and provide helpful message
+    if (!opts.appId || !opts.appKey) {
+      const envPath = path.resolve(process.cwd(), '.env');
+      if (!fs.existsSync(envPath)) {
+        console.error('\nMissing app credentials. Please create a .env file in your project root with:');
+        console.error('MSOCKET_APP_ID=your-app-id');
+        console.error('MSOCKET_APP_KEY=your-app-key');
+        console.error('\nAlternatively, provide them as command line options: --app-id and --app-key');
+        process.exit(1);
+      }
+    }
+    
+    // Prompt for any still missing fields
     if (!opts.appId) {
       process.stdout.write("App ID: ");
       opts.appId = await readInput();
@@ -121,7 +145,7 @@ program
   .command("generate")
   .description("generate TS types from latest schema")
   .requiredOption("--server <url>")
-  .requiredOption("--app-id <id>")
+  .option("--app-id <id>", "application ID")
   .option(
     "--dts-out <file>",
     "output declaration file",
@@ -129,6 +153,22 @@ program
   )
   .option("--ts-out <file>", "optional typed helper .ts file")
   .action(async (opts) => {
+    // Get app ID from CLI option or environment variable
+    if (!opts.appId) {
+      opts.appId = process.env.MSOCKET_APP_ID;
+    }
+    
+    if (!opts.appId) {
+      const envPath = path.resolve(process.cwd(), '.env');
+      if (!fs.existsSync(envPath)) {
+        console.error('\nMissing app ID. Please create a .env file in your project root with:');
+        console.error('MSOCKET_APP_ID=your-app-id');
+        console.error('\nAlternatively, provide it as a command line option: --app-id');
+        process.exit(1);
+      }
+      process.stdout.write("App ID: ");
+      opts.appId = await readInput();
+    }
     const res = await fetch(
       new URL(
         `/api/schema/latest?appId=${encodeURIComponent(opts.appId)}`,
@@ -157,8 +197,24 @@ program
   .command("schema:pull")
   .description("pull latest schema")
   .requiredOption("--server <url>")
-  .requiredOption("--app-id <id>")
+  .option("--app-id <id>", "application ID")
   .action(async (opts) => {
+    // Get app ID from CLI option or environment variable
+    if (!opts.appId) {
+      opts.appId = process.env.MSOCKET_APP_ID;
+    }
+    
+    if (!opts.appId) {
+      const envPath = path.resolve(process.cwd(), '.env');
+      if (!fs.existsSync(envPath)) {
+        console.error('\nMissing app ID. Please create a .env file in your project root with:');
+        console.error('MSOCKET_APP_ID=your-app-id');
+        console.error('\nAlternatively, provide it as a command line option: --app-id');
+        process.exit(1);
+      }
+      process.stdout.write("App ID: ");
+      opts.appId = await readInput();
+    }
     const res = await fetch(
       new URL(
         `/api/schema/latest?appId=${encodeURIComponent(opts.appId)}`,
@@ -176,8 +232,24 @@ program
   .command("log")
   .description("list schema versions")
   .requiredOption("--server <url>")
-  .requiredOption("--app-id <id>")
+  .option("--app-id <id>", "application ID")
   .action(async (opts) => {
+    // Get app ID from CLI option or environment variable
+    if (!opts.appId) {
+      opts.appId = process.env.MSOCKET_APP_ID;
+    }
+    
+    if (!opts.appId) {
+      const envPath = path.resolve(process.cwd(), '.env');
+      if (!fs.existsSync(envPath)) {
+        console.error('\nMissing app ID. Please create a .env file in your project root with:');
+        console.error('MSOCKET_APP_ID=your-app-id');
+        console.error('\nAlternatively, provide it as a command line option: --app-id');
+        process.exit(1);
+      }
+      process.stdout.write("App ID: ");
+      opts.appId = await readInput();
+    }
     const res = await fetch(
       new URL(
         `/api/schema/versions?appId=${encodeURIComponent(opts.appId)}`,
