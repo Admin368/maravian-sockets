@@ -1,15 +1,41 @@
 const { z, defineSchema } = require('@maravian/maravian-sockets-types');
 
 module.exports = defineSchema({
-  appId: 'my-app',
+  appId: 'chat2',
   version: new Date().toISOString(),
   topics: [
     {
       topic: 'chat.messages',
-      description: 'Chat topic',
+      description: 'Chat messages topic',
       messages: [
-        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },
-        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }
+        { 
+          name: 'send', 
+          direction: 'both', 
+          payload: z.object({ 
+            username: z.string(), 
+            text: z.string() 
+          }) 
+        }
+      ]
+    },
+    {
+      topic: 'system.presence',
+      description: 'System presence events',
+      messages: [
+        {
+          name: 'user.join',
+          direction: 'both',
+          payload: z.object({
+            username: z.string()
+          })
+        },
+        {
+          name: 'user.leave', 
+          direction: 'both',
+          payload: z.object({
+            username: z.string()
+          })
+        }
       ]
     }
   ]

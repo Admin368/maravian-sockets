@@ -107,7 +107,7 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
       if (DEBUG) {
         console.log('[ChatRoom] Received chat message:', msg);
       }
-      if (msg.type === "message") {
+      if (msg.type === "send") {
         setMessages(prev => [...prev, {
           id: `${msg.payload.username}-${msg.ts || Date.now()}`,
           username: msg.payload.username,
@@ -169,7 +169,7 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
       
       const result = await socket.publish(
         "chat.messages",
-        "message",
+        "send",
         {
           username,
           text: newMessage.trim()

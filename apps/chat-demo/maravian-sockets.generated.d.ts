@@ -5,8 +5,12 @@ declare namespace SocketMaxGenerated {
   interface Topics {
 
     "chat.messages": {
-      publish: { "send": { "text": string } };
-      subscribe: { "received": { "text": string; "from": string } };
+      publish: { "send": { "username": string; "text": string } };
+      subscribe: { "send": { "username": string; "text": string } };
+    }
+    "system.presence": {
+      publish: { "user.join": { "username": string }; "user.leave": { "username": string } };
+      subscribe: { "user.join": { "username": string }; "user.leave": { "username": string } };
     }
   }
 
