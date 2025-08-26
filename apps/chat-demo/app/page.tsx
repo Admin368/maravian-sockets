@@ -5,6 +5,8 @@ import { SocketMaxProvider } from "@maravian/maravian-sockets-sdk";
 import { ChatRoom } from "./components/ChatRoom";
 import { ConnectionForm } from "./components/ConnectionForm";
 
+const DEBUG = process.env.NEXT_PUBLIC_DEBUG_SOCKETS === "true";
+
 export default function Home() {
   const [serverUrl, setServerUrl] = useState("http://localhost:8080");
   const [appId, setAppId] = useState("");
@@ -12,6 +14,9 @@ export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
 
   const handleConnect = (url: string, id: string, user: string) => {
+    if (DEBUG) {
+      console.log("[Home] Connecting with:", { url, id, user });
+    }
     setServerUrl(url);
     setAppId(id);
     setUsername(user);
@@ -43,6 +48,7 @@ export default function Home() {
             options={{
               serverUrl,
               appId,
+              appKey: process.env.NEXT_PUBLIC_MSOCKET_APP_KEY,
               autoConnect: true,
             }}
           >

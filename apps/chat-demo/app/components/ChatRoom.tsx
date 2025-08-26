@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useMaravianSockets } from "@maravian/maravian-sockets-sdk";
 
+const DEBUG = process.env.NEXT_PUBLIC_DEBUG_SOCKETS === 'true';
+
 interface Message {
   id: string;
   username: string;
@@ -24,6 +26,62 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socket = useMaravianSockets();
 
+  // Debug socket state changes
+  useEffect(() => {
+    if (DEBUG) {
+      console.log('[ChatRoom] Socket connection state:', socket.connected);
+      console.log('[ChatRoom] Socket object:', socket);
+    }
+  }, [socket.connected]);
+
+  // Monitor socket events for debugging
+  useEffect(() => {
+    if (!socket || !DEBUG) return;
+
+    const handleConnect = () => {
+      console.log('[ChatRoom] Socket connected!');
+      // Send a join message when connected
+      socket.publish('system.presence', 'user.join', { username })
+        .then(result => {
+          console.log('[ChatRoom] Join message sent:', result);
+        })
+        .catch(error => {
+          console.error('[ChatRoom] Failed to send join message:', error);
+        });
+    };
+
+    const handleDisconnect = () => {
+      console.log('[ChatRoom] Socket disconnected!');
+    };
+
+    const handleError = (error: any) => {
+      console.error('[ChatRoom] Socket error:', error);
+    };
+
+    // Try to access socket events if available
+    try {
+      if (socket.on) {
+        socket.on('connect', handleConnect);
+        socket.on('disconnect', handleDisconnect);
+        socket.on('error', handleError);
+      }
+    } catch (e) {
+      console.log('[ChatRoom] Socket event binding not available:', e);
+    }
+
+    return () => {
+      try {
+        if (socket.off) {
+          socket.off('connect', handleConnect);
+          socket.off('disconnect', handleDisconnect);
+          socket.off('error', handleError);
+        }
+      } catch (e) {
+        console.log('[ChatRoom] Socket event cleanup not available:', e);
+      }
+    };
+  }, [socket, username]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -33,10 +91,22 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
   }, [messages]);
 
   useEffect(() => {
-    if (!socket.connected) return;
+    if (!socket.connected) {
+      if (DEBUG) {
+        console.log('[ChatRoom] Socket not connected, skipping message listeners');
+      }
+      return;
+    }
+
+    if (DEBUG) {
+      console.log('[ChatRoom] Setting up message listeners');
+    }
 
     // Listen for chat messages
     const unsubscribe = socket.onTopic("chat.messages", (msg: any) => {
+      if (DEBUG) {
+        console.log('[ChatRoom] Received chat message:', msg);
+      }
       if (msg.type === "message") {
         setMessages(prev => [...prev, {
           id: `${msg.payload.username}-${msg.ts || Date.now()}`,
@@ -49,24 +119,30 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
 
     // Listen for user join/leave events
     const unsubscribePresence = socket.onTopic("system.presence", (msg: any) => {
+      if (DEBUG) {
+        console.log('[ChatRoom] Received presence message:', msg);
+      }
       if (msg.type === "user.join") {
         setMessages(prev => [...prev, {
           id: `join-${msg.ts || Date.now()}`,
           username: "System",
-          text: `User joined the chat`,
+          text: `${msg.payload?.username || 'Someone'} joined the chat`,
           timestamp: msg.ts || Date.now()
         }]);
       } else if (msg.type === "user.leave") {
         setMessages(prev => [...prev, {
           id: `leave-${msg.ts || Date.now()}`,
           username: "System", 
-          text: `User left the chat`,
+          text: `${msg.payload?.username || 'Someone'} left the chat`,
           timestamp: msg.ts || Date.now()
         }]);
       }
     });
 
     return () => {
+      if (DEBUG) {
+        console.log('[ChatRoom] Cleaning up message listeners');
+      }
       unsubscribe();
       unsubscribePresence();
     };
@@ -74,10 +150,23 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !socket.connected || isLoading) return;
+    if (!newMessage.trim() || !socket.connected || isLoading) {
+      if (DEBUG) {
+        console.log('[ChatRoom] Send message blocked:', { 
+          hasMessage: !!newMessage.trim(), 
+          connected: socket.connected, 
+          loading: isLoading 
+        });
+      }
+      return;
+    }
 
     setIsLoading(true);
     try {
+      if (DEBUG) {
+        console.log('[ChatRoom] Sending message:', { username, text: newMessage.trim() });
+      }
+      
       const result = await socket.publish(
         "chat.messages",
         "message",
@@ -86,6 +175,10 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
           text: newMessage.trim()
         }
       );
+
+      if (DEBUG) {
+        console.log('[ChatRoom] Message send result:', result);
+      }
 
       if (result.ok) {
         setNewMessage("");

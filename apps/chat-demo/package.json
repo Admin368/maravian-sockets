@@ -12,22 +12,23 @@
     "socket_schema:push": "npx @maravian/maravian-sockets-cli push --config ./chat-schema.config.js"
   },
   "dependencies": {
+    "@maravian/maravian-sockets-cli": "workspace:*",
+    "@maravian/maravian-sockets-sdk": "workspace:*",
+    "@maravian/maravian-sockets-types": "workspace:*",
+    "next": "14.2.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "next": "14.2.18",
-    "@maravian/maravian-sockets-sdk": "workspace:*",
-    "@maravian/maravian-sockets-cli": "workspace:*",
-    "@maravian/maravian-sockets-types": "workspace:*"
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
-    "typescript": "^5.5.4",
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "postcss": "^8.4.41",
-    "tailwindcss": "^3.4.10",
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.18"
+    "eslint-config-next": "14.2.18",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.4"
   }
 }

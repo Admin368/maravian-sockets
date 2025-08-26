@@ -13,6 +13,7 @@ export type UseSocketMaxOptions = {
   serverUrl: string;
   appId: string;
   token?: string;
+  appKey?: string;
   autoConnect?: boolean;
 };
 
@@ -56,24 +57,31 @@ export function SocketMaxProvider({
   children: React.ReactNode;
   options: UseSocketMaxOptions;
 }) {
-  const { serverUrl, appId, token, autoConnect = true } = options;
+  const { serverUrl, appId, token, appKey, autoConnect = true } = options;
   const [connected, setConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const authTokenRef = useRef<string | undefined>(token);
 
   const ensureSocket = useCallback(() => {
     if (socketRef.current) return socketRef.current;
+    
+    // Build query object with appId and optionally appKey
+    const query: Record<string, string> = { appId };
+    if (appKey) {
+      query.appKey = appKey;
+    }
+    
     const s = io(serverUrl, {
       autoConnect: false,
       transports: ["websocket"],
-      auth: () => ({ token: authTokenRef.current }),
-      query: { appId },
+      auth: token || authTokenRef.current ? () => ({ token: authTokenRef.current }) : undefined,
+      query,
     });
     s.on("connect", () => setConnected(true));
     s.on("disconnect", () => setConnected(false));
     socketRef.current = s;
     return s;
-  }, [serverUrl, appId]);
+  }, [serverUrl, appId, appKey, token]);
 
   const connect = useCallback(
     (newToken?: string) => {
