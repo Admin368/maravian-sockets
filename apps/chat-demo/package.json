@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "socket_schema:create": "npx @maravian/maravian-sockets-cli init --out chat-schema.config.ts",
-    "socket_schema:push": "npx @maravian/maravian-sockets-cli push --config ./chat-schema.config.ts"
+    "socket_schema:create": "npx @maravian/maravian-sockets-cli init --out chat-schema.config.js",
+    "socket_schema:generate": "npx @maravian/maravian-sockets-cli generate --server http://localhost:8080 --app-id chat2",
+    "socket_schema:push": "npx @maravian/maravian-sockets-cli push --config ./chat-schema.config.js --app-id chat2 --app-key 4OfVq1jCNCMt9uUlGCj7fZbneeNa4s9_"
   },
   "dependencies": {
     "react": "^18.3.1",

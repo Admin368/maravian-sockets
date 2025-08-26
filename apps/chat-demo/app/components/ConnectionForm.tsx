@@ -8,7 +8,7 @@ interface ConnectionFormProps {
 
 export function ConnectionForm({ onConnect }: ConnectionFormProps) {
   const [serverUrl, setServerUrl] = useState("http://localhost:8080");
-  const [appId, setAppId] = useState("chat-demo");
+  const [appId, setAppId] = useState("chat2");
   const [username, setUsername] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -24,10 +24,13 @@ export function ConnectionForm({ onConnect }: ConnectionFormProps) {
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
           Connect to Chat
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="serverUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="serverUrl"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Server URL
             </label>
             <input
@@ -42,7 +45,10 @@ export function ConnectionForm({ onConnect }: ConnectionFormProps) {
           </div>
 
           <div>
-            <label htmlFor="appId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="appId"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               App ID
             </label>
             <input
@@ -51,13 +57,16 @@ export function ConnectionForm({ onConnect }: ConnectionFormProps) {
               value={appId}
               onChange={(e) => setAppId(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="chat-demo"
+              placeholder="chat2"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Username
             </label>
             <input
@@ -84,8 +93,22 @@ export function ConnectionForm({ onConnect }: ConnectionFormProps) {
             Quick Setup:
           </h3>
           <ol className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-            <li>1. Start the Maravian Sockets server: <code className="bg-gray-200 dark:bg-gray-600 px-1 rounded">pnpm dev</code></li>
-            <li>2. Create an app in the dashboard at <a href="http://localhost:8080" className="text-blue-600 hover:underline" target="_blank">localhost:8080</a></li>
+            <li>
+              1. Start the Maravian Sockets server:{" "}
+              <code className="bg-gray-200 dark:bg-gray-600 px-1 rounded">
+                pnpm dev
+              </code>
+            </li>
+            <li>
+              2. Create an app in the dashboard at{" "}
+              <a
+                href="http://localhost:8080"
+                className="text-blue-600 hover:underline"
+                target="_blank"
+              >
+                localhost:8080
+              </a>
+            </li>
             <li>3. Use the app ID here to connect</li>
           </ol>
         </div>

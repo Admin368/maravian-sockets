@@ -1,6 +1,6 @@
-import { z, defineSchema } from '@maravian/maravian-sockets-types';
+const { z, defineSchema } = require('@maravian/maravian-sockets-types');
 
-export default defineSchema({
+module.exports = defineSchema({
   appId: 'my-app',
   version: new Date().toISOString(),
   topics: [

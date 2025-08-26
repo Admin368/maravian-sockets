@@ -19,10 +19,14 @@ program
       console.error("File exists:", file);
       process.exit(1);
     }
-    fs.writeFileSync(
-      file,
-      `import { z, defineSchema } from '@maravian/maravian-sockets-types';\n\nexport default defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`
-    );
+    
+    // Generate different syntax based on file extension
+    const isJavaScript = file.endsWith('.js');
+    const content = isJavaScript
+      ? `const { z, defineSchema } = require('@maravian/maravian-sockets-types');\n\nmodule.exports = defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`
+      : `import { z, defineSchema } from '@maravian/maravian-sockets-types';\n\nexport default defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`;
+    
+    fs.writeFileSync(file, content);
     console.log("Created:", file);
   });
 
@@ -55,9 +59,26 @@ program
       schema = require(configPath);
     } else {
       // Handle TS files with ts-node
-      require("ts-node").register({ transpileOnly: true });
-      const mod = await import(configPath);
-      schema = mod.default || mod.schema || mod;
+      try {
+        require("ts-node").register({ 
+          transpileOnly: true,
+          compilerOptions: {
+            module: 'commonjs',
+            target: 'es2020',
+            esModuleInterop: true,
+            allowSyntheticDefaultImports: true,
+            skipLibCheck: true,
+            moduleResolution: 'node'
+          },
+          ignore: ['/node_modules/']
+        });
+        const mod = await import(configPath);
+        schema = mod.default || mod.schema || mod;
+      } catch (error) {
+        console.error('Error loading TypeScript config file. Try using a .js file instead.');
+        console.error('Error details:', error instanceof Error ? error.message : String(error));
+        process.exit(1);
+      }
     }
     // serialize Zod payloads into JSON Schema per message
     const jsonSchema = {
