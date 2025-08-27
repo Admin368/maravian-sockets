@@ -1,0 +1,9 @@
+{
+  "name": "test-project",
+  "scripts": {
+    "socket_schema:init": "npx @maravian/maravian-sockets-cli init",
+    "socket_schema:create": "npx @maravian/maravian-sockets-cli init",
+    "socket_schema:push": "npx @maravian/maravian-sockets-cli push --config maravian_sockets\\schema.config.js",
+    "socket_schema:generate": "npx @maravian/maravian-sockets-cli generate --server http://localhost:8080 --dts-out maravian_sockets\\generated.d.ts"
+  }
+}

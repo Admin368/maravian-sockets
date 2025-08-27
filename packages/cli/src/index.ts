@@ -7,31 +7,43 @@ import dotenv from "dotenv";
 // Load .env file from current working directory
 dotenv.config();
 
+interface MaravianConfig {
+  initialized: boolean;
+  projectType: 'nextjs' | 'react' | 'vanilla';
+  schemaPath: string;
+  generatedPath: string;
+  version: string;
+}
+
+const MARAVIAN_DIR = 'maravian_sockets';
+const CONFIG_FILE = '.maravian';
+const SCHEMA_FILE = 'schema.config.js';
+const GENERATED_FILE = 'generated.d.ts';
+const README_FILE = 'README.md';
+
 const program = new Command();
 program
   .name("maravian-sockets")
-  .description("Maravian Sockets CLI")
-  .version("0.1.0");
+  .description("Maravian Sockets CLI - v3.0")
+  .version("0.2.0");
 
+// Enhanced init command that sets up the entire project
 program
   .command("init")
-  .description("create a starter schema config")
-  .option("-o, --out <file>", "output file", "socketmax.config.ts")
-  .action((opts) => {
-    const file = path.resolve(process.cwd(), opts.out);
-    if (fs.existsSync(file)) {
-      console.error("File exists:", file);
+  .description("Initialize Maravian Sockets in your project with complete setup")
+  .option("--app-id <id>", "Application ID (optional)")
+  .option("--force", "Force re-initialization")
+  .action(async (opts) => {
+    console.log('🚀 Initializing Maravian Sockets project...');
+    
+    // Check if already initialized
+    const configPath = path.resolve(process.cwd(), MARAVIAN_DIR, CONFIG_FILE);
+    if (fs.existsSync(configPath) && !opts.force) {
+      console.error('❌ Project already initialized. Use --force to re-initialize.');
       process.exit(1);
     }
     
-    // Generate different syntax based on file extension
-    const isJavaScript = file.endsWith('.js');
-    const content = isJavaScript
-      ? `const { z, defineSchema } = require('@maravian/maravian-sockets-types');\n\nmodule.exports = defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`
-      : `import { z, defineSchema } from '@maravian/maravian-sockets-types';\n\nexport default defineSchema({\n  appId: 'my-app',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat topic',\n      messages: [\n        { name: 'send', direction: 'publish', payload: z.object({ text: z.string() }) },\n        { name: 'received', direction: 'subscribe', payload: z.object({ text: z.string(), from: z.string() }) }\n      ]\n    }\n  ]\n});\n`;
-    
-    fs.writeFileSync(file, content);
-    console.log("Created:", file);
+    await initializeProject(opts.appId);
   });
 
 program
@@ -40,8 +52,19 @@ program
   .option("--server <url>", "server URL", "http://localhost:8080")
   .option("--app-id <id>", "application ID")
   .option("--app-key <key>", "application key")
-  .requiredOption("--config <file>")
+  .option("--config <file>", "schema config file")
   .action(async (opts) => {
+    // Auto-detect config file if not provided
+    if (!opts.config) {
+      const autoPath = path.join(process.cwd(), MARAVIAN_DIR, SCHEMA_FILE);
+      if (fs.existsSync(autoPath)) {
+        opts.config = autoPath;
+        console.log(`📄 Using schema: ${path.relative(process.cwd(), autoPath)}`);
+      } else {
+        console.error('❌ No schema config found. Run `maravian-sockets init` first or specify --config');
+        process.exit(1);
+      }
+    }
     // Get app ID from CLI option, environment variable, or prompt
     if (!opts.appId) {
       opts.appId = process.env.MSOCKET_APP_ID;
@@ -435,4 +458,87 @@ function jsonSchemaToTs(s: any): string {
     default:
       return "any";
   }
+}
+
+async function initializeProject(appId?: string) {
+  const cwd = process.cwd();
+  const socketsDir = path.join(cwd, MARAVIAN_DIR);
+  if (!fs.existsSync(socketsDir)) fs.mkdirSync(socketsDir, { recursive: true });
+
+  // Create .env.local if missing
+  const envLocal = path.join(cwd, '.env.local');
+  if (!fs.existsSync(envLocal)) {
+    fs.writeFileSync(envLocal, [
+      '# Maravian Sockets Configuration',
+      'NEXT_PUBLIC_MSOCKET_SERVER_URL=http://localhost:8080',
+      `NEXT_PUBLIC_MSOCKET_APP_ID=${appId || 'my-app'}`,
+      'NEXT_PUBLIC_MSOCKET_APP_KEY=YOUR_APP_KEY_HERE',
+      'NEXT_PUBLIC_DEBUG_SOCKETS=true',
+      ''
+    ].join('\n'));
+    console.log('📝 Created .env.local');
+  }
+
+  // Create schema.config.js
+  const schemaPath = path.join(socketsDir, SCHEMA_FILE);
+  if (!fs.existsSync(schemaPath)) {
+    const content = `const { z, defineSchema } = require('@maravian/maravian-sockets-types');\n\nmodule.exports = defineSchema({\n  appId: '${appId || 'my-app'}',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat messages',\n      messages: [\n        { name: 'send', direction: 'both', payload: z.object({ username: z.string(), text: z.string() }) }\n      ]\n    },\n    {\n      topic: 'system.presence',\n      description: 'Presence',\n      messages: [\n        { name: 'user.join', direction: 'both', payload: z.object({ username: z.string() }) },\n        { name: 'user.leave', direction: 'both', payload: z.object({ username: z.string() }) }\n      ]\n    }\n  ]\n});\n`;
+    fs.writeFileSync(schemaPath, content);
+    console.log('📝 Created', path.relative(cwd, schemaPath));
+  }
+
+  // README
+  const readmePath = path.join(socketsDir, README_FILE);
+  if (!fs.existsSync(readmePath)) {
+    fs.writeFileSync(readmePath, [
+      '# Maravian Sockets',
+      '',
+      'This folder contains your Maravian Sockets schema and generated types.',
+      '',
+      'Commands:',
+      '- pnpm socket_schema:create',
+      '- pnpm socket_schema:push',
+      '- pnpm socket_schema:generate',
+      '',
+      'Generated types will be written to maravian_sockets/generated.d.ts',
+      ''
+    ].join('\n'));
+  }
+
+  // .maravian state
+  const state: MaravianConfig = {
+    initialized: true,
+    projectType: fs.existsSync(path.join(cwd, 'next.config.js')) ? 'nextjs' : 'vanilla',
+    schemaPath: path.relative(cwd, schemaPath),
+    generatedPath: path.relative(cwd, path.join(socketsDir, GENERATED_FILE)),
+    version: '3.0.0'
+  };
+  fs.writeFileSync(path.join(socketsDir, CONFIG_FILE), JSON.stringify(state, null, 2));
+
+  // Update package.json scripts
+  const pkgPath = path.join(cwd, 'package.json');
+  if (fs.existsSync(pkgPath)) {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    pkg.scripts = pkg.scripts || {};
+    pkg.scripts['socket_schema:init'] = 'npx @maravian/maravian-sockets-cli init';
+    pkg.scripts['socket_schema:create'] = `npx @maravian/maravian-sockets-cli init`;
+    pkg.scripts['socket_schema:push'] = `npx @maravian/maravian-sockets-cli push --config ${path.join(MARAVIAN_DIR, SCHEMA_FILE)}`;
+    pkg.scripts['socket_schema:generate'] = `npx @maravian/maravian-sockets-cli generate --server http://localhost:8080 --dts-out ${path.join(MARAVIAN_DIR, GENERATED_FILE)}`;
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+    console.log('🧩 Updated package.json scripts');
+  }
+
+  // Next.js config patching
+  const nextConfigPath = path.join(cwd, 'next.config.js');
+  if (fs.existsSync(nextConfigPath)) {
+    let cfg = fs.readFileSync(nextConfigPath, 'utf8');
+    if (!cfg.includes("transpilePackages")) {
+      cfg = cfg.replace(/module\.exports\s*=\s*nextConfig;?/s, '');
+      const injected = `/** @type {import('next').NextConfig} */\nconst nextConfig = {\n  transpilePackages: [\n    '@maravian/maravian-sockets-sdk',\n    '@maravian/maravian-sockets-types'\n  ],\n  experimental: {\n    esmExternals: 'loose'\n  },\n  webpack: (config, { dev }) => {\n    if (dev) {\n      config.resolve.alias = {\n        ...config.resolve.alias,\n        '@maravian/maravian-sockets-sdk': require('path').resolve(__dirname, 'packages/sdk/src/index.tsx'),\n      };\n    }\n    config.resolve.extensionAlias = {\n      '.js': ['.ts', '.tsx', '.js', '.jsx'],\n      '.mjs': ['.mts', '.mjs'],\n      '.cjs': ['.cts', '.cjs']\n    };\n    return config;\n  }\n};\n\nmodule.exports = nextConfig;\n`;
+      fs.writeFileSync(nextConfigPath, injected);
+      console.log('🔧 Patched next.config.js');
+    }
+  }
+
+  console.log('✅ Maravian Sockets initialized.');
 }
