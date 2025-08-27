@@ -34,53 +34,19 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
     }
   }, [socket.connected]);
 
-  // Monitor socket events for debugging
+  // Send join message when socket connects
   useEffect(() => {
-    if (!socket || !DEBUG) return;
+    if (!socket.connected || !DEBUG) return;
 
-    const handleConnect = () => {
-      console.log('[ChatRoom] Socket connected!');
-      // Send a join message when connected
-      socket.publish('system.presence', 'user.join', { username })
-        .then(result => {
-          console.log('[ChatRoom] Join message sent:', result);
-        })
-        .catch(error => {
-          console.error('[ChatRoom] Failed to send join message:', error);
-        });
-    };
-
-    const handleDisconnect = () => {
-      console.log('[ChatRoom] Socket disconnected!');
-    };
-
-    const handleError = (error: any) => {
-      console.error('[ChatRoom] Socket error:', error);
-    };
-
-    // Try to access socket events if available
-    try {
-      if (socket.on) {
-        socket.on('connect', handleConnect);
-        socket.on('disconnect', handleDisconnect);
-        socket.on('error', handleError);
-      }
-    } catch (e) {
-      console.log('[ChatRoom] Socket event binding not available:', e);
-    }
-
-    return () => {
-      try {
-        if (socket.off) {
-          socket.off('connect', handleConnect);
-          socket.off('disconnect', handleDisconnect);
-          socket.off('error', handleError);
-        }
-      } catch (e) {
-        console.log('[ChatRoom] Socket event cleanup not available:', e);
-      }
-    };
-  }, [socket, username]);
+    console.log('[ChatRoom] Socket connected, sending join message');
+    socket.publish('system.presence', 'user.join', { username })
+      .then(result => {
+        console.log('[ChatRoom] Join message sent:', result);
+      })
+      .catch(error => {
+        console.error('[ChatRoom] Failed to send join message:', error);
+      });
+  }, [socket.connected, username]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
