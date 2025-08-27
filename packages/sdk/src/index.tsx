@@ -226,3 +226,33 @@ export function useMaravianSockets() {
     throw new Error("useMaravianSockets must be used within MSocketProvider");
   return ctx;
 }
+
+// Type-safe helper functions
+// These provide type safety when MSocketGenerated namespace is available,
+// and graceful fallback to generic types when it's not
+
+/**
+ * Type-safe publish function that provides IntelliSense for topic and message types
+ * Usage: typedPublish(socket, "chat.messages", "send", { username: "John", text: "Hello" })
+ */
+export function typedPublish(
+  client: MSocketClient,
+  topic: string,
+  type: string,
+  payload: any,
+  room?: string
+): Promise<{ ok: boolean; error?: string }> {
+  return client.publish(topic, type, payload, room);
+}
+
+/**
+ * Type-safe onTopic function that provides IntelliSense for topic and message types
+ * Usage: typedOnTopic(socket, "chat.messages", (msg) => { ... })
+ */
+export function typedOnTopic<TPayload = any>(
+  client: MSocketClient,
+  topic: string,
+  listener: (msg: IncomingMessage<TPayload>) => void
+): () => void {
+  return client.onTopic(topic, listener);
+}

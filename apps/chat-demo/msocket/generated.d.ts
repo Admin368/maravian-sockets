@@ -20,4 +20,10 @@ declare namespace MSocketGenerated {
 
   type SubscribeType<T extends TopicName> = keyof Topics[T]['subscribe'];
 
+  type PublishPayload<T extends TopicName, K extends PublishType<T>> = Topics[T]['publish'][K];
+
+  type SubscribePayload<T extends TopicName, K extends SubscribeType<T>> = Topics[T]['subscribe'][K];
+
+  type IncomingMessage<P> = { type: string; payload: P; ts?: number };
+
 }

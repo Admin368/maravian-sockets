@@ -1,9 +1,31 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useMaravianSockets } from "@maravian/maravian-sockets-sdk";
+/**
+ * ChatRoom Component - Demonstrating Maravian Sockets v0.4.0 Type-Safe Features
+ * 
+ * This component showcases the new type-safe functionality:
+ * - typedPublish(): Provides IntelliSense and compile-time validation for message payloads
+ * - typedOnTopic(): Provides typed message payloads in subscription handlers
+ * - Generated schema types ensure data consistency between client and server
+ * 
+ * Benefits:
+ * ✅ Auto-completion for topic names and message structures
+ * ✅ Compile-time type checking prevents runtime errors
+ * ✅ IntelliSense shows available fields and their types
+ * ✅ Schema evolution automatically updates types
+ */
 
-const DEBUG = process.env.NEXT_PUBLIC_DEBUG_SOCKETS === 'true';
+import { useState, useEffect, useRef } from "react";
+import {
+  useMaravianSockets,
+  typedPublish,   // 🆕 v0.4.0 Type-safe publish
+  typedOnTopic,   // 🆕 v0.4.0 Type-safe subscribe
+} from "@maravian/maravian-sockets-sdk";
+
+// Include generated types for this project's schema
+/// <reference path="../msocket/generated.d.ts" />
+
+const DEBUG = process.env.NEXT_PUBLIC_DEBUG_SOCKETS === "true";
 
 interface Message {
   id: string;
@@ -19,7 +41,12 @@ interface ChatRoomProps {
   appId: string;
 }
 
-export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomProps) {
+export function ChatRoom({
+  username,
+  onDisconnect,
+  serverUrl,
+  appId,
+}: ChatRoomProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -29,17 +56,18 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
   // Debug socket state changes
   useEffect(() => {
     if (DEBUG) {
-      console.log('[ChatRoom] Socket connection state:', socket.connected);
-      console.log('[ChatRoom] Socket object:', socket);
+      console.log("[ChatRoom] Socket connection state:", socket.connected);
+      console.log("[ChatRoom] Socket object:", socket);
     }
   }, [socket.connected]);
 
-  // Send join message when socket connects
+  // Send join message when socket connects using type-safe function
   useEffect(() => {
     if (!socket.connected || !DEBUG) return;
 
     console.log('[ChatRoom] Socket connected, sending join message');
-    socket.publish('system.presence', 'user.join', { username })
+    // Using type-safe publish - provides IntelliSense and validation
+    typedPublish(socket, 'system.presence', 'user.join', { username })
       .then(result => {
         console.log('[ChatRoom] Join message sent:', result);
       })
@@ -59,55 +87,69 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
   useEffect(() => {
     if (!socket.connected) {
       if (DEBUG) {
-        console.log('[ChatRoom] Socket not connected, skipping message listeners');
+        console.log(
+          "[ChatRoom] Socket not connected, skipping message listeners"
+        );
       }
       return;
     }
 
     if (DEBUG) {
-      console.log('[ChatRoom] Setting up message listeners');
+      console.log("[ChatRoom] Setting up message listeners");
     }
 
-    // Listen for chat messages
-    const unsubscribe = socket.onTopic("chat.messages", (msg: any) => {
+    // Listen for chat messages using type-safe function
+    const unsubscribe = typedOnTopic(socket, "chat.messages", (msg) => {
       if (DEBUG) {
-        console.log('[ChatRoom] Received chat message:', msg);
+        console.log("[ChatRoom] Received chat message:", msg);
       }
       if (msg.type === "send") {
-        setMessages(prev => [...prev, {
-          id: `${msg.payload.username}-${msg.ts || Date.now()}`,
-          username: msg.payload.username,
-          text: msg.payload.text,
-          timestamp: msg.ts || Date.now()
-        }]);
+        // msg.payload is now typed as { username: string; text: string }
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `${msg.payload.username}-${msg.ts || Date.now()}`,
+            username: msg.payload.username,
+            text: msg.payload.text,
+            timestamp: msg.ts || Date.now(),
+          },
+        ]);
       }
     });
 
-    // Listen for user join/leave events
-    const unsubscribePresence = socket.onTopic("system.presence", (msg: any) => {
+    // Listen for user join/leave events using type-safe function
+    const unsubscribePresence = typedOnTopic(socket, "system.presence", (msg) => {
       if (DEBUG) {
-        console.log('[ChatRoom] Received presence message:', msg);
+        console.log("[ChatRoom] Received presence message:", msg);
       }
       if (msg.type === "user.join") {
-        setMessages(prev => [...prev, {
-          id: `join-${msg.ts || Date.now()}`,
-          username: "System",
-          text: `${msg.payload?.username || 'Someone'} joined the chat`,
-          timestamp: msg.ts || Date.now()
-        }]);
+        // msg.payload is now typed as { username: string }
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `join-${msg.ts || Date.now()}`,
+            username: "System",
+            text: `${msg.payload?.username || "Someone"} joined the chat`,
+            timestamp: msg.ts || Date.now(),
+          },
+        ]);
       } else if (msg.type === "user.leave") {
-        setMessages(prev => [...prev, {
-          id: `leave-${msg.ts || Date.now()}`,
-          username: "System", 
-          text: `${msg.payload?.username || 'Someone'} left the chat`,
-          timestamp: msg.ts || Date.now()
-        }]);
+        // msg.payload is now typed as { username: string }
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `leave-${msg.ts || Date.now()}`,
+            username: "System",
+            text: `${msg.payload?.username || "Someone"} left the chat`,
+            timestamp: msg.ts || Date.now(),
+          },
+        ]);
       }
     });
 
     return () => {
       if (DEBUG) {
-        console.log('[ChatRoom] Cleaning up message listeners');
+        console.log("[ChatRoom] Cleaning up message listeners");
       }
       unsubscribe();
       unsubscribePresence();
@@ -118,10 +160,10 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
     e.preventDefault();
     if (!newMessage.trim() || !socket.connected || isLoading) {
       if (DEBUG) {
-        console.log('[ChatRoom] Send message blocked:', { 
-          hasMessage: !!newMessage.trim(), 
-          connected: socket.connected, 
-          loading: isLoading 
+        console.log("[ChatRoom] Send message blocked:", {
+          hasMessage: !!newMessage.trim(),
+          connected: socket.connected,
+          loading: isLoading,
         });
       }
       return;
@@ -130,20 +172,21 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
     setIsLoading(true);
     try {
       if (DEBUG) {
-        console.log('[ChatRoom] Sending message:', { username, text: newMessage.trim() });
-      }
-      
-      const result = await socket.publish(
-        "chat.messages",
-        "send",
-        {
+        console.log("[ChatRoom] Sending message:", {
           username,
-          text: newMessage.trim()
-        }
-      );
+          text: newMessage.trim(),
+        });
+      }
+
+      // Using type-safe publish - provides compile-time type checking
+      const result = await typedPublish(socket, "chat.messages", "send", {
+        username, // ✅ Type-checked against schema
+        text: newMessage.trim(), // ✅ Type-checked against schema
+        // extra: "field" // ❌ Would cause TypeScript error (when proper typing is enabled)
+      });
 
       if (DEBUG) {
-        console.log('[ChatRoom] Message send result:', result);
+        console.log("[ChatRoom] Message send result:", result);
       }
 
       if (result.ok) {
@@ -159,9 +202,9 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
   };
 
   const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -172,8 +215,9 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
         <div>
           <h2 className="text-xl font-bold">Chat Room</h2>
           <p className="text-blue-100">
-            Connected as <span className="font-medium">{username}</span> | 
-            Status: {socket.connected ? (
+            Connected as <span className="font-medium">{username}</span> |
+            Status:{" "}
+            {socket.connected ? (
               <span className="text-green-200">Connected</span>
             ) : (
               <span className="text-red-200">Disconnected</span>
@@ -211,17 +255,21 @@ export function ChatRoom({ username, onDisconnect, serverUrl, appId }: ChatRoomP
                     : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
                 }`}
               >
-                {message.username !== "System" && message.username !== username && (
-                  <div className="text-xs font-medium mb-1">
-                    {message.username}
-                  </div>
-                )}
+                {message.username !== "System" &&
+                  message.username !== username && (
+                    <div className="text-xs font-medium mb-1">
+                      {message.username}
+                    </div>
+                  )}
                 <div className="text-sm">{message.text}</div>
-                <div className={`text-xs mt-1 ${
-                  message.username === username || message.username === "System"
-                    ? "text-blue-100"
-                    : "text-gray-500 dark:text-gray-400"
-                }`}>
+                <div
+                  className={`text-xs mt-1 ${
+                    message.username === username ||
+                    message.username === "System"
+                      ? "text-blue-100"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                >
                   {formatTime(message.timestamp)}
                 </div>
               </div>

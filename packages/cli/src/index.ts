@@ -439,6 +439,15 @@ function generateDTS(schema: any): string {
   lines.push(
     "  type SubscribeType<T extends TopicName> = keyof Topics[T]['subscribe'];\n"
   );
+  lines.push(
+    "  type PublishPayload<T extends TopicName, K extends PublishType<T>> = Topics[T]['publish'][K];\n"
+  );
+  lines.push(
+    "  type SubscribePayload<T extends TopicName, K extends SubscribeType<T>> = Topics[T]['subscribe'][K];\n"
+  );
+  lines.push(
+    "  type IncomingMessage<P> = { type: string; payload: P; ts?: number };\n"
+  );
   lines.push("}\n");
   return lines.join("\n");
 }
