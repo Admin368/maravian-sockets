@@ -1,7 +1,7 @@
 const { z, defineSchema } = require('@maravian/maravian-sockets-types');
 
 module.exports = defineSchema({
-  appId: 'test-chat',
+  appId: 'chat2',
   version: new Date().toISOString(),
   topics: [
     {

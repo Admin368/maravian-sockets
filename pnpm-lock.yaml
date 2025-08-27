@@ -218,6 +218,12 @@ importers:
         specifier: ^5.5.4
         version: 5.9.2
 
+  test-v3:
+    dependencies:
+      '@maravian/maravian-sockets-types':
+        specifier: 0.2.0
+        version: 0.2.0
+
 packages:
 
   '@alloc/quick-lru@5.2.0':
@@ -515,6 +521,9 @@ packages:
 
   '@maravian/maravian-sockets-types@0.1.1':
     resolution: {integrity: sha512-YEhAY8zxEyBlveYDcM4h1ECX01pTo8imL2er6cHA3a2LVjKR7oCrBmSiqccLRhm4ub0EzQxtzZTBV0AgoRaKFA==}
+
+  '@maravian/maravian-sockets-types@0.2.0':
+    resolution: {integrity: sha512-KFy+lzr22mS9SDhWScAWVlOHczGT/xTWfU634oPs7MklPk/wBMfp0uJyyA0zbgnCHfj2A7IvWWTEv3R/nQR/Sw==}
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
@@ -3212,6 +3221,10 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@maravian/maravian-sockets-types@0.1.1':
+    dependencies:
+      zod: 3.25.76
+
+  '@maravian/maravian-sockets-types@0.2.0':
     dependencies:
       zod: 3.25.76
 

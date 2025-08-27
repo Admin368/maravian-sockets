@@ -167,15 +167,21 @@ program
 program
   .command("generate")
   .description("generate TS types from latest schema")
-  .requiredOption("--server <url>")
+  .option("--server <url>", "server URL", "http://localhost:8080")
   .option("--app-id <id>", "application ID")
-  .option(
-    "--dts-out <file>",
-    "output declaration file",
-    "maravian-sockets.generated.d.ts"
-  )
+  .option("--dts-out <file>", "output declaration file")
   .option("--ts-out <file>", "optional typed helper .ts file")
   .action(async (opts) => {
+    // Auto-detect output path if not provided
+    if (!opts.dtsOut) {
+      const autoPath = path.join(process.cwd(), MARAVIAN_DIR, GENERATED_FILE);
+      if (fs.existsSync(path.join(process.cwd(), MARAVIAN_DIR))) {
+        opts.dtsOut = autoPath;
+        console.log(`📝 Generating types: ${path.relative(process.cwd(), autoPath)}`);
+      } else {
+        opts.dtsOut = 'maravian-sockets.generated.d.ts';
+      }
+    }
     // Get app ID from CLI option or environment variable
     if (!opts.appId) {
       opts.appId = process.env.MSOCKET_APP_ID;

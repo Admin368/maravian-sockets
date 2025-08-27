@@ -1,0 +1,7 @@
+{
+  "initialized": true,
+  "projectType": "nextjs",
+  "schemaPath": "maravian_sockets\\schema.config.js",
+  "generatedPath": "maravian_sockets\\generated.d.ts",
+  "version": "3.0.0"
+}
