@@ -3,8 +3,7 @@ import { Live } from "./Live";
 import { AdminUsers } from "./AdminUsers";
 import { SchemaPanel } from "./SchemaPanel";
 
-const serverUrl =
-  (import.meta as any).env?.VITE_SERVER_URL || window.location.origin;
+const serverUrl = process.env?.VITE_SERVER_URL || window.location.origin;
 
 function useApi() {
   const base = serverUrl;
@@ -86,8 +85,8 @@ function useLocalStorage<T>(key: string, initial: T) {
 
 export function App() {
   const api = useApi();
-  const [auth, setAuth] = useLocalStorage<any>("socketmax_auth", null);
-  const [appSel, setAppSel] = useLocalStorage<string>("socketmax_app", "");
+  const [auth, setAuth] = useLocalStorage<any>("msocket_auth", null);
+  const [appSel, setAppSel] = useLocalStorage<string>("msocket_app", "");
   const [apps, setApps] = useState<any[]>([]);
   const [topics, setTopics] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);

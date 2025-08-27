@@ -9,17 +9,17 @@ dotenv.config();
 
 interface MaravianConfig {
   initialized: boolean;
-  projectType: 'nextjs' | 'react' | 'vanilla';
+  projectType: "nextjs" | "react" | "vanilla";
   schemaPath: string;
   generatedPath: string;
   version: string;
 }
 
-const MARAVIAN_DIR = 'maravian_sockets';
-const CONFIG_FILE = '.maravian';
-const SCHEMA_FILE = 'schema.config.js';
-const GENERATED_FILE = 'generated.d.ts';
-const README_FILE = 'README.md';
+const MARAVIAN_DIR = "msocket";
+const CONFIG_FILE = ".maravian";
+const SCHEMA_FILE = "schema.config.js";
+const GENERATED_FILE = "generated.d.ts";
+const README_FILE = "README.md";
 
 const program = new Command();
 program
@@ -30,19 +30,23 @@ program
 // Enhanced init command that sets up the entire project
 program
   .command("init")
-  .description("Initialize Maravian Sockets in your project with complete setup")
+  .description(
+    "Initialize Maravian Sockets in your project with complete setup"
+  )
   .option("--app-id <id>", "Application ID (optional)")
   .option("--force", "Force re-initialization")
   .action(async (opts) => {
-    console.log('🚀 Initializing Maravian Sockets project...');
-    
+    console.log("🚀 Initializing Maravian Sockets project...");
+
     // Check if already initialized
     const configPath = path.resolve(process.cwd(), MARAVIAN_DIR, CONFIG_FILE);
     if (fs.existsSync(configPath) && !opts.force) {
-      console.error('❌ Project already initialized. Use --force to re-initialize.');
+      console.error(
+        "❌ Project already initialized. Use --force to re-initialize."
+      );
       process.exit(1);
     }
-    
+
     await initializeProject(opts.appId);
   });
 
@@ -59,9 +63,13 @@ program
       const autoPath = path.join(process.cwd(), MARAVIAN_DIR, SCHEMA_FILE);
       if (fs.existsSync(autoPath)) {
         opts.config = autoPath;
-        console.log(`📄 Using schema: ${path.relative(process.cwd(), autoPath)}`);
+        console.log(
+          `📄 Using schema: ${path.relative(process.cwd(), autoPath)}`
+        );
       } else {
-        console.error('❌ No schema config found. Run `maravian-sockets init` first or specify --config');
+        console.error(
+          "❌ No schema config found. Run `maravian-sockets init` first or specify --config"
+        );
         process.exit(1);
       }
     }
@@ -72,19 +80,23 @@ program
     if (!opts.appKey) {
       opts.appKey = process.env.MSOCKET_APP_KEY;
     }
-    
+
     // If still missing, check if .env file exists and provide helpful message
     if (!opts.appId || !opts.appKey) {
-      const envPath = path.resolve(process.cwd(), '.env');
+      const envPath = path.resolve(process.cwd(), ".env");
       if (!fs.existsSync(envPath)) {
-        console.error('\nMissing app credentials. Please create a .env file in your project root with:');
-        console.error('MSOCKET_APP_ID=your-app-id');
-        console.error('MSOCKET_APP_KEY=your-app-key');
-        console.error('\nAlternatively, provide them as command line options: --app-id and --app-key');
+        console.error(
+          "\nMissing app credentials. Please create a .env file in your project root with:"
+        );
+        console.error("MSOCKET_APP_ID=your-app-id");
+        console.error("MSOCKET_APP_KEY=your-app-key");
+        console.error(
+          "\nAlternatively, provide them as command line options: --app-id and --app-key"
+        );
         process.exit(1);
       }
     }
-    
+
     // Prompt for any still missing fields
     if (!opts.appId) {
       process.stdout.write("App ID: ");
@@ -107,23 +119,28 @@ program
     } else {
       // Handle TS files with ts-node
       try {
-        require("ts-node").register({ 
+        require("ts-node").register({
           transpileOnly: true,
           compilerOptions: {
-            module: 'commonjs',
-            target: 'es2020',
+            module: "commonjs",
+            target: "es2020",
             esModuleInterop: true,
             allowSyntheticDefaultImports: true,
             skipLibCheck: true,
-            moduleResolution: 'node'
+            moduleResolution: "node",
           },
-          ignore: ['/node_modules/']
+          ignore: ["/node_modules/"],
         });
         const mod = await import(configPath);
         schema = mod.default || mod.schema || mod;
       } catch (error) {
-        console.error('Error loading TypeScript config file. Try using a .js file instead.');
-        console.error('Error details:', error instanceof Error ? error.message : String(error));
+        console.error(
+          "Error loading TypeScript config file. Try using a .js file instead."
+        );
+        console.error(
+          "Error details:",
+          error instanceof Error ? error.message : String(error)
+        );
         process.exit(1);
       }
     }
@@ -167,7 +184,7 @@ program
 program
   .command("generate")
   .description("generate TS types from latest schema")
-  .option("--server <url>", "server URL", "http://localhost:8080")
+  .option("--server <url>", "server URL", process.env.NEXT_PUBLIC_MSOCKET_SERVER_URL || "http://localhost:8080")
   .option("--app-id <id>", "application ID")
   .option("--dts-out <file>", "output declaration file")
   .option("--ts-out <file>", "optional typed helper .ts file")
@@ -177,22 +194,28 @@ program
       const autoPath = path.join(process.cwd(), MARAVIAN_DIR, GENERATED_FILE);
       if (fs.existsSync(path.join(process.cwd(), MARAVIAN_DIR))) {
         opts.dtsOut = autoPath;
-        console.log(`📝 Generating types: ${path.relative(process.cwd(), autoPath)}`);
+        console.log(
+          `📝 Generating types: ${path.relative(process.cwd(), autoPath)}`
+        );
       } else {
-        opts.dtsOut = 'maravian-sockets.generated.d.ts';
+        opts.dtsOut = "maravian-sockets.generated.d.ts";
       }
     }
     // Get app ID from CLI option or environment variable
     if (!opts.appId) {
       opts.appId = process.env.MSOCKET_APP_ID;
     }
-    
+
     if (!opts.appId) {
-      const envPath = path.resolve(process.cwd(), '.env');
+      const envPath = path.resolve(process.cwd(), ".env");
       if (!fs.existsSync(envPath)) {
-        console.error('\nMissing app ID. Please create a .env file in your project root with:');
-        console.error('MSOCKET_APP_ID=your-app-id');
-        console.error('\nAlternatively, provide it as a command line option: --app-id');
+        console.error(
+          "\nMissing app ID. Please create a .env file in your project root with:"
+        );
+        console.error("MSOCKET_APP_ID=your-app-id");
+        console.error(
+          "\nAlternatively, provide it as a command line option: --app-id"
+        );
         process.exit(1);
       }
       process.stdout.write("App ID: ");
@@ -232,13 +255,17 @@ program
     if (!opts.appId) {
       opts.appId = process.env.MSOCKET_APP_ID;
     }
-    
+
     if (!opts.appId) {
-      const envPath = path.resolve(process.cwd(), '.env');
+      const envPath = path.resolve(process.cwd(), ".env");
       if (!fs.existsSync(envPath)) {
-        console.error('\nMissing app ID. Please create a .env file in your project root with:');
-        console.error('MSOCKET_APP_ID=your-app-id');
-        console.error('\nAlternatively, provide it as a command line option: --app-id');
+        console.error(
+          "\nMissing app ID. Please create a .env file in your project root with:"
+        );
+        console.error("MSOCKET_APP_ID=your-app-id");
+        console.error(
+          "\nAlternatively, provide it as a command line option: --app-id"
+        );
         process.exit(1);
       }
       process.stdout.write("App ID: ");
@@ -267,13 +294,17 @@ program
     if (!opts.appId) {
       opts.appId = process.env.MSOCKET_APP_ID;
     }
-    
+
     if (!opts.appId) {
-      const envPath = path.resolve(process.cwd(), '.env');
+      const envPath = path.resolve(process.cwd(), ".env");
       if (!fs.existsSync(envPath)) {
-        console.error('\nMissing app ID. Please create a .env file in your project root with:');
-        console.error('MSOCKET_APP_ID=your-app-id');
-        console.error('\nAlternatively, provide it as a command line option: --app-id');
+        console.error(
+          "\nMissing app ID. Please create a .env file in your project root with:"
+        );
+        console.error("MSOCKET_APP_ID=your-app-id");
+        console.error(
+          "\nAlternatively, provide it as a command line option: --app-id"
+        );
         process.exit(1);
       }
       process.stdout.write("App ID: ");
@@ -349,7 +380,7 @@ function zodToJson(z: any): { schema: any; optional?: boolean } {
 function generateDTS(schema: any): string {
   const lines: string[] = [];
   lines.push("// Generated by Maravian Sockets CLI\n");
-  lines.push("declare namespace SocketMaxGenerated {\n");
+  lines.push("declare namespace MSocketGenerated {\n");
   // Topics interface mapping publish/subscribe payloads
   lines.push("  interface Topics {\n");
   for (const t of schema.topics || []) {
@@ -472,79 +503,103 @@ async function initializeProject(appId?: string) {
   if (!fs.existsSync(socketsDir)) fs.mkdirSync(socketsDir, { recursive: true });
 
   // Create .env.local if missing
-  const envLocal = path.join(cwd, '.env.local');
+  const envLocal = path.join(cwd, ".env.local");
   if (!fs.existsSync(envLocal)) {
-    fs.writeFileSync(envLocal, [
-      '# Maravian Sockets Configuration',
-      'NEXT_PUBLIC_MSOCKET_SERVER_URL=http://localhost:8080',
-      `NEXT_PUBLIC_MSOCKET_APP_ID=${appId || 'my-app'}`,
-      'NEXT_PUBLIC_MSOCKET_APP_KEY=YOUR_APP_KEY_HERE',
-      'NEXT_PUBLIC_DEBUG_SOCKETS=true',
-      ''
-    ].join('\n'));
-    console.log('📝 Created .env.local');
+    fs.writeFileSync(
+      envLocal,
+      [
+        "# Maravian Sockets Configuration",
+        "NEXT_PUBLIC_MSOCKET_SERVER_URL=http://localhost:8080",
+        `NEXT_PUBLIC_MSOCKET_APP_ID=${appId || "my-app"}`,
+        "NEXT_PUBLIC_MSOCKET_APP_KEY=YOUR_APP_KEY_HERE",
+        "NEXT_PUBLIC_DEBUG_SOCKETS=true",
+        "",
+      ].join("\n")
+    );
+    console.log("📝 Created .env.local");
   }
 
   // Create schema.config.js
   const schemaPath = path.join(socketsDir, SCHEMA_FILE);
   if (!fs.existsSync(schemaPath)) {
-    const content = `const { z, defineSchema } = require('@maravian/maravian-sockets-types');\n\nmodule.exports = defineSchema({\n  appId: '${appId || 'my-app'}',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat messages',\n      messages: [\n        { name: 'send', direction: 'both', payload: z.object({ username: z.string(), text: z.string() }) }\n      ]\n    },\n    {\n      topic: 'system.presence',\n      description: 'Presence',\n      messages: [\n        { name: 'user.join', direction: 'both', payload: z.object({ username: z.string() }) },\n        { name: 'user.leave', direction: 'both', payload: z.object({ username: z.string() }) }\n      ]\n    }\n  ]\n});\n`;
+    const content = `/* eslint-disable @typescript-eslint/no-require-imports */\nconst { z, defineSchema } = require('@maravian/maravian-sockets-types');\n\nmodule.exports = defineSchema({\n  appId: process.env.NEXT_PUBLIC_MSOCKET_APP_ID || '${appId || "my-app"}',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat messages',\n      messages: [\n        { name: 'send', direction: 'both', payload: z.object({ username: z.string(), text: z.string() }) }\n      ]\n    },\n    {\n      topic: 'system.presence',\n      description: 'Presence',\n      messages: [\n        { name: 'user.join', direction: 'both', payload: z.object({ username: z.string() }) },\n        { name: 'user.leave', direction: 'both', payload: z.object({ username: z.string() }) }\n      ]\n    }\n  ]\n});\n`;
     fs.writeFileSync(schemaPath, content);
-    console.log('📝 Created', path.relative(cwd, schemaPath));
+    console.log("📝 Created", path.relative(cwd, schemaPath));
   }
 
   // README
   const readmePath = path.join(socketsDir, README_FILE);
   if (!fs.existsSync(readmePath)) {
-    fs.writeFileSync(readmePath, [
-      '# Maravian Sockets',
-      '',
-      'This folder contains your Maravian Sockets schema and generated types.',
-      '',
-      'Commands:',
-      '- pnpm socket_schema:create',
-      '- pnpm socket_schema:push',
-      '- pnpm socket_schema:generate',
-      '',
-      'Generated types will be written to maravian_sockets/generated.d.ts',
-      ''
-    ].join('\n'));
+    fs.writeFileSync(
+      readmePath,
+      [
+        "# Maravian Sockets",
+        "",
+        "This folder contains your Maravian Sockets schema and generated types.",
+        "",
+        "Commands:",
+        "- pnpm msocket:create",
+        "- pnpm msocket:push",
+        "- pnpm msocket:generate",
+        "",
+        "Generated types will be written to msocket/generated.d.ts",
+        "",
+      ].join("\n")
+    );
   }
 
   // .maravian state
   const state: MaravianConfig = {
     initialized: true,
-    projectType: fs.existsSync(path.join(cwd, 'next.config.js')) ? 'nextjs' : 'vanilla',
+    projectType: fs.existsSync(path.join(cwd, "next.config.js"))
+      ? "nextjs"
+      : "vanilla",
     schemaPath: path.relative(cwd, schemaPath),
     generatedPath: path.relative(cwd, path.join(socketsDir, GENERATED_FILE)),
-    version: '3.0.0'
+    version: "3.0.0",
   };
-  fs.writeFileSync(path.join(socketsDir, CONFIG_FILE), JSON.stringify(state, null, 2));
+  fs.writeFileSync(
+    path.join(socketsDir, CONFIG_FILE),
+    JSON.stringify(state, null, 2)
+  );
 
   // Update package.json scripts
-  const pkgPath = path.join(cwd, 'package.json');
+  const pkgPath = path.join(cwd, "package.json");
   if (fs.existsSync(pkgPath)) {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
     pkg.scripts = pkg.scripts || {};
-    pkg.scripts['socket_schema:init'] = 'npx @maravian/maravian-sockets-cli init';
-    pkg.scripts['socket_schema:create'] = `npx @maravian/maravian-sockets-cli init`;
-    pkg.scripts['socket_schema:push'] = `npx @maravian/maravian-sockets-cli push --config ${path.join(MARAVIAN_DIR, SCHEMA_FILE)}`;
-    pkg.scripts['socket_schema:generate'] = `npx @maravian/maravian-sockets-cli generate --server http://localhost:8080 --dts-out ${path.join(MARAVIAN_DIR, GENERATED_FILE)}`;
+    pkg.scripts["msocket:init"] =
+      "npx @maravian/maravian-sockets-cli init";
+    pkg.scripts[
+      "msocket:create"
+    ] = `npx @maravian/maravian-sockets-cli init`;
+    pkg.scripts[
+      "msocket:push"
+    ] = `npx @maravian/maravian-sockets-cli push --config ${path.join(
+      MARAVIAN_DIR,
+      SCHEMA_FILE
+    )}`;
+    pkg.scripts[
+      "msocket:generate"
+    ] = `npx @maravian/maravian-sockets-cli generate --dts-out ${path.join(
+      MARAVIAN_DIR,
+      GENERATED_FILE
+    )}`;
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
-    console.log('🧩 Updated package.json scripts');
+    console.log("🧩 Updated package.json scripts");
   }
 
   // Next.js config patching
-  const nextConfigPath = path.join(cwd, 'next.config.js');
+  const nextConfigPath = path.join(cwd, "next.config.js");
   if (fs.existsSync(nextConfigPath)) {
-    let cfg = fs.readFileSync(nextConfigPath, 'utf8');
+    let cfg = fs.readFileSync(nextConfigPath, "utf8");
     if (!cfg.includes("transpilePackages")) {
-      cfg = cfg.replace(/module\.exports\s*=\s*nextConfig;?/s, '');
+      cfg = cfg.replace(/module\.exports\s*=\s*nextConfig;?/s, "");
       const injected = `/** @type {import('next').NextConfig} */\nconst nextConfig = {\n  transpilePackages: [\n    '@maravian/maravian-sockets-sdk',\n    '@maravian/maravian-sockets-types'\n  ],\n  experimental: {\n    esmExternals: 'loose'\n  },\n  webpack: (config, { dev }) => {\n    if (dev) {\n      config.resolve.alias = {\n        ...config.resolve.alias,\n        '@maravian/maravian-sockets-sdk': require('path').resolve(__dirname, 'packages/sdk/src/index.tsx'),\n      };\n    }\n    config.resolve.extensionAlias = {\n      '.js': ['.ts', '.tsx', '.js', '.jsx'],\n      '.mjs': ['.mts', '.mjs'],\n      '.cjs': ['.cts', '.cjs']\n    };\n    return config;\n  }\n};\n\nmodule.exports = nextConfig;\n`;
       fs.writeFileSync(nextConfigPath, injected);
-      console.log('🔧 Patched next.config.js');
+      console.log("🔧 Patched next.config.js");
     }
   }
 
-  console.log('✅ Maravian Sockets initialized.');
+  console.log("✅ Maravian Sockets initialized.");
 }

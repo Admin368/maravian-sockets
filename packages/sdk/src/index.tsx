@@ -9,7 +9,7 @@ import React, {
   useState,
 } from "react";
 
-export type UseSocketMaxOptions = {
+export type UseMSocketOptions = {
   serverUrl: string;
   appId: string;
   token?: string;
@@ -23,7 +23,7 @@ export type IncomingMessage<TPayload = any> = {
   ts?: number;
 };
 
-export type SocketMaxClient = {
+export type MSocketClient = {
   socket: Socket | null;
   connected: boolean;
   connect: (token?: string) => void;
@@ -48,14 +48,14 @@ export type SocketMaxClient = {
   };
 };
 
-const Ctx = createContext<SocketMaxClient | null>(null);
+const Ctx = createContext<MSocketClient | null>(null);
 
-export function SocketMaxProvider({
+export function MSocketProvider({
   children,
   options,
 }: {
   children: React.ReactNode;
-  options: UseSocketMaxOptions;
+  options: UseMSocketOptions;
 }) {
   const { serverUrl, appId, token, appKey, autoConnect = true } = options;
   const [connected, setConnected] = useState(false);
@@ -64,17 +64,20 @@ export function SocketMaxProvider({
 
   const ensureSocket = useCallback(() => {
     if (socketRef.current) return socketRef.current;
-    
+
     // Build query object with appId and optionally appKey
     const query: Record<string, string> = { appId };
     if (appKey) {
       query.appKey = appKey;
     }
-    
+
     const s = io(serverUrl, {
       autoConnect: false,
       transports: ["websocket"],
-      auth: token || authTokenRef.current ? () => ({ token: authTokenRef.current }) : undefined,
+      auth:
+        token || authTokenRef.current
+          ? () => ({ token: authTokenRef.current })
+          : undefined,
       query,
     });
     s.on("connect", () => setConnected(true));
@@ -186,7 +189,7 @@ export function SocketMaxProvider({
     [ensureSocket]
   );
 
-  const value = useMemo<SocketMaxClient>(
+  const value = useMemo<MSocketClient>(
     () => ({
       socket: socketRef.current,
       connected,
@@ -220,6 +223,6 @@ export function SocketMaxProvider({
 export function useMaravianSockets() {
   const ctx = useContext(Ctx);
   if (!ctx)
-    throw new Error("useMaravianSockets must be used within SocketMaxProvider");
+    throw new Error("useMaravianSockets must be used within MSocketProvider");
   return ctx;
 }

@@ -72,6 +72,9 @@ importers:
         specifier: ^4.7.5
         version: 4.8.1
     devDependencies:
+      '@types/node':
+        specifier: ^20.14.2
+        version: 20.19.11
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.24
@@ -100,8 +103,8 @@ importers:
   packages/cli:
     dependencies:
       '@maravian/maravian-sockets-types':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.2.0
+        version: 0.2.0
       commander:
         specifier: ^12.1.0
         version: 12.1.0
@@ -518,9 +521,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
-
-  '@maravian/maravian-sockets-types@0.1.1':
-    resolution: {integrity: sha512-YEhAY8zxEyBlveYDcM4h1ECX01pTo8imL2er6cHA3a2LVjKR7oCrBmSiqccLRhm4ub0EzQxtzZTBV0AgoRaKFA==}
 
   '@maravian/maravian-sockets-types@0.2.0':
     resolution: {integrity: sha512-KFy+lzr22mS9SDhWScAWVlOHczGT/xTWfU634oPs7MklPk/wBMfp0uJyyA0zbgnCHfj2A7IvWWTEv3R/nQR/Sw==}
@@ -3219,10 +3219,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
-
-  '@maravian/maravian-sockets-types@0.1.1':
-    dependencies:
-      zod: 3.25.76
 
   '@maravian/maravian-sockets-types@0.2.0':
     dependencies:

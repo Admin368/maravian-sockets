@@ -13,7 +13,7 @@ import fs from "fs";
 const PORT = Number(process.env.PORT || 8080);
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 const DB_PATH =
-  process.env.DB_PATH || path.resolve(process.cwd(), "data", "socketmax.db");
+  process.env.DB_PATH || path.resolve(process.cwd(), "data", "msocket.db");
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 
 // Ensure data directory exists
@@ -143,7 +143,9 @@ app.post("/api/login", (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password)
     return res.status(400).json({ error: "email/password required" });
-  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email) as any;
+  const user = db
+    .prepare("SELECT * FROM users WHERE email = ?")
+    .get(email) as any;
   if (!user) return res.status(401).json({ error: "invalid credentials" });
   const bcrypt = require("bcryptjs");
   if (!bcrypt.compareSync(password, user.password_hash))
@@ -188,7 +190,9 @@ app.post("/api/schema/push", (req, res) => {
     return res
       .status(400)
       .json({ error: "appId, appKey, version, schema required" });
-  const appRow = db.prepare("SELECT * FROM apps WHERE app_id = ?").get(appId) as any;
+  const appRow = db
+    .prepare("SELECT * FROM apps WHERE app_id = ?")
+    .get(appId) as any;
   if (!appRow || appRow.app_key !== appKey)
     return res.status(401).json({ error: "invalid app credentials" });
   const id = nanoid();
@@ -298,7 +302,9 @@ app.get("/api/users", authMiddleware, (req, res) => {
   const rows = db
     .prepare("SELECT id, email, display_name, roles, banned FROM users")
     .all();
-  res.json(rows.map((r: any) => ({ ...r, roles: JSON.parse(r.roles || "[]") })));
+  res.json(
+    rows.map((r: any) => ({ ...r, roles: JSON.parse(r.roles || "[]") }))
+  );
 });
 
 app.post("/api/users/roles", authMiddleware, (req, res) => {
@@ -307,7 +313,9 @@ app.post("/api/users/roles", authMiddleware, (req, res) => {
     return res.status(403).json({ error: "forbidden" });
   const { userId, add, remove } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId required" });
-  const u = db.prepare("SELECT roles FROM users WHERE id = ?").get(userId) as any;
+  const u = db
+    .prepare("SELECT roles FROM users WHERE id = ?")
+    .get(userId) as any;
   if (!u) return res.status(404).json({ error: "user not found" });
   const r: string[] = JSON.parse(u.roles || "[]");
   if (Array.isArray(add)) for (const x of add) if (!r.includes(x)) r.push(x);
@@ -391,7 +399,9 @@ io.on("connection", (socket) => {
 
   // If user is banned, disconnect immediately
   if (userId) {
-    const u = db.prepare("SELECT banned FROM users WHERE id = ?").get(userId) as any;
+    const u = db
+      .prepare("SELECT banned FROM users WHERE id = ?")
+      .get(userId) as any;
     if (u && u.banned) {
       socket.emit("system.connection", {
         type: "status",

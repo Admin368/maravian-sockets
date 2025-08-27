@@ -10,7 +10,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-dev-secret}
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
-      - DB_PATH=/data/socketmax.db
+      - DB_PATH=/data/msocket.db
       - CORS_ORIGIN=${CORS_ORIGIN:-*}
     volumes:
       - ./data:/data

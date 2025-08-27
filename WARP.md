@@ -5,7 +5,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 Repository overview
 
 - Monorepo managed by pnpm workspaces (packages/_, apps/_).
-- Purpose: a docker-deployable, type-safe socket server with a React dashboard, a TypeScript SDK (React hook provider), and a CLI to define/push/generate schemas.
+- Purpose: a docker-deployable, type-safe socket server with a React dashboard, a TypeScript SDK (React hook provider with useMSocket hook), and a CLI v3 to define/push/generate schemas with improved project organization.
 - Node engine: >=20 <21 (Node 20 is required).
 
 Prerequisites
@@ -59,14 +59,21 @@ Common commands
   - Then: pnpm dev:dashboard
   - Note: In production, the server serves the built dashboard from packages/server/public.
 
-- CLI (develop and run locally)
+- CLI v3 (develop and run locally)
 
   - Build CLI: pnpm --filter @maravian/maravian-sockets-cli run build
   - Run CLI (no publish): node packages/cli/dist/index.js --help
   - Examples:
-    - node packages/cli/dist/index.js init --out socketmax.config.ts
-    - node packages/cli/dist/index.js push --server http://localhost:8080 --app-id myapp --app-key {{APP_KEY}} --config ./socketmax.config.ts
-    - node packages/cli/dist/index.js generate --server http://localhost:8080 --app-id myapp --dts-out ./maravian-sockets.generated.d.ts --ts-out ./maravian-sockets.helpers.ts
+    - node packages/cli/dist/index.js init
+    - node packages/cli/dist/index.js push
+    - node packages/cli/dist/index.js generate
+  - CLI v3 improvements:
+    - Creates organized `msocket/` folder structure
+    - Auto-detects config and output paths
+    - Generates npm scripts with `msocket:` prefix
+    - Supports environment variables (NEXT_PUBLIC_MSOCKET_SERVER_URL, etc.)
+    - ESLint-compatible schema.config.js generation
+    - Environment variable support in schema appId
 
 - Docker
 
@@ -86,7 +93,7 @@ Environment
   - PORT (default 8080)
   - JWT_SECRET (JWT signing secret)
   - ADMIN_EMAIL / ADMIN_PASSWORD (bootstrap an admin user on first run)
-  - DB_PATH (default ./data/socketmax.db; Docker uses /data/socketmax.db)
+  - DB_PATH (default ./data/msocket.db; Docker uses /data/msocket.db)
   - CORS_ORIGIN (default \*; set to your dashboard/consumer origin in non-dev)
 
 High-level architecture and data flow
@@ -96,15 +103,16 @@ High-level architecture and data flow
   - packages/server: Express + Socket.IO server backed by SQLite (better-sqlite3). Serves HTTP APIs and Socket.IO events; can optionally serve the built Dashboard from packages/server/public.
   - packages/types: Type-safe schema DSL definitions using zod (defineSchema, message primitives, system types).
   - packages/cli: Commander-based CLI for schema lifecycle: init, push (zod -> JSON Schema conversion and POST to server), generate (DTS + optional TS helpers), schema:pull, log.
-  - packages/sdk: React provider (SocketMaxProvider) and hook (useMaravianSockets) wrapping socket.io-client with typed helpers and admin methods.
+  - packages/sdk: React provider (MSocketProvider) and hook (useMaravianSockets) wrapping socket.io-client with typed helpers and admin methods.
   - apps/dashboard: Vite/React admin UI for login, app management, schema push, room/topic overview, live message stream, and user administration.
   - apps/chat-demo: Next.js example application demonstrating real-time chat using the SDK and type-safe socket connections.
 
 - Schema pipeline
 
-  - Author schemas as TypeScript via zod using the DSL (often in socketmax.config.ts).
+  - Author schemas as TypeScript via zod using the DSL (in msocket/schema.config.js with CLI v3).
   - CLI push converts zod payloads to JSON Schema (partial converter) and POSTs to /api/schema/push with appId/appKey/version.
   - Server persists the raw schema JSON into SQLite (schemas table) and updates the topics table; the latest schema per app drives runtime validation and topic typing.
+  - Generated TypeScript types use MSocketGenerated namespace instead of SocketMaxGenerated.
 
 - Server responsibilities (packages/server/src/index.ts)
 
@@ -142,7 +150,7 @@ High-level architecture and data flow
 
 - SDK (packages/sdk)
 
-  - SocketMaxProvider manages a socket.io-client instance with auth token handling, onTopic subscription helper, publish with ack, join/leave room helpers, and admin helpers (ban/unban via socket events). The React hook useMaravianSockets exposes this client API.
+  - MSocketProvider manages a socket.io-client instance with auth token handling, onTopic subscription helper, publish with ack, join/leave room helpers, and admin helpers (ban/unban via socket events). The React hook useMaravianSockets exposes this client API.
 
 - Dashboard (apps/dashboard)
 

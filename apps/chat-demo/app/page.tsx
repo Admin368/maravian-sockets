@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SocketMaxProvider } from "@maravian/maravian-sockets-sdk";
+import { MSocketProvider } from "@maravian/maravian-sockets-sdk";
 import { ChatRoom } from "./components/ChatRoom";
 import { ConnectionForm } from "./components/ConnectionForm";
 
@@ -44,7 +44,7 @@ export default function Home() {
         {!isConnected ? (
           <ConnectionForm onConnect={handleConnect} />
         ) : (
-          <SocketMaxProvider
+          <MSocketProvider
             options={{
               serverUrl,
               appId,
@@ -58,7 +58,7 @@ export default function Home() {
               serverUrl={serverUrl}
               appId={appId}
             />
-          </SocketMaxProvider>
+          </MSocketProvider>
         )}
       </div>
     </div>

@@ -102,7 +102,7 @@ Visit http://localhost:3000 and start chatting!
 
 - **ConnectionForm**: Handles server/app connection setup
 - **ChatRoom**: Main chat interface with real-time messaging
-- **SocketMaxProvider**: React context provider for socket connection
+- **MSocketProvider**: React context provider for socket connection
 
 ### Message Flow
 

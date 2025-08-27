@@ -1,6 +1,6 @@
 # Maravian Sockets
 
-Maravian Sockets is a docker-deployable, type-safe socket server with a dashboard, a TypeScript schema DSL, a React SDK (useMaravianSockets hook), and a CLI for schema push/generate/pull.
+Maravian Sockets is a docker-deployable, type-safe socket server with a dashboard, a TypeScript schema DSL, a React SDK (useMSocket hook), and a CLI for schema push/generate/pull.
 
 Highlights:
 
@@ -8,7 +8,7 @@ Highlights:
 - Express + Socket.IO server with SQLite persistence
 - Dashboard UI for auth, topics, rooms, users, live message stream & filters
 - React SDK with typed subscribe/publish and room/auth/admin helpers
-- CLI: `init`, `push`, `generate`, `schema pull`, `log`
+- CLI v3: `init`, `push`, `generate`, `schema pull`, `log` with improved project structure
 - Docker image that serves both API and Dashboard; SQLite persisted via volume
 
 ## Quickstart (pnpm)
@@ -40,14 +40,45 @@ Environment variables (Docker or local):
 - PORT: default 8080
 - JWT_SECRET: secret for issuing JWTs
 - ADMIN_EMAIL / ADMIN_PASSWORD: bootstrap admin
-- DB_PATH: default `./data/socketmax.db` (Docker uses `/data/socketmax.db`)
+- DB_PATH: default `./data/msocket.db` (Docker uses `/data/msocket.db`)
 - CORS_ORIGIN: allowed origin (e.g. http://localhost:5173)
 
-CLI usage example (after `pnpm install`):
+## CLI v3 Usage
 
-- npx maravian-sockets init
-- npx maravian-sockets push --config ./socketmax.config.ts --server http://localhost:8080 --app-id myapp --app-key {{APP_KEY}}
-- npx maravian-sockets generate --server http://localhost:8080 --app-id myapp --dts-out ./maravian-sockets.generated.d.ts --ts-out ./maravian-sockets.helpers.ts
+The CLI v3 provides an enhanced developer experience with better project organization:
+
+### Initialize a new project:
+```bash
+npx @maravian/maravian-sockets-cli init
+```
+
+This creates:
+- `msocket/` folder containing all socket-related files
+- `msocket/schema.config.js` with ESLint configuration and environment variable support
+- `msocket/generated.d.ts` for TypeScript type definitions
+- `.env.local` with MSocket configuration
+- Updated `package.json` with convenient npm scripts:
+  - `msocket:init` - Initialize the project
+  - `msocket:push` - Push schema to server
+  - `msocket:generate` - Generate TypeScript types
+
+### Push schema to server:
+```bash
+npm run msocket:push
+# or directly: npx @maravian/maravian-sockets-cli push
+```
+
+### Generate TypeScript types:
+```bash
+npm run msocket:generate
+# or directly: npx @maravian/maravian-sockets-cli generate
+```
+
+### Environment Variables:
+The CLI v3 supports environment variables for seamless integration:
+- `NEXT_PUBLIC_MSOCKET_SERVER_URL` - Server URL (default: http://localhost:8080)
+- `NEXT_PUBLIC_MSOCKET_APP_ID` - Your application ID
+- `NEXT_PUBLIC_MSOCKET_APP_KEY` - Your application key
 
 See apps/dashboard and packages for more details.
 
