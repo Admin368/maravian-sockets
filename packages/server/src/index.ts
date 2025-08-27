@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS messages (
 const adminEmail = process.env.ADMIN_EMAIL;
 const adminPassword = process.env.ADMIN_PASSWORD;
 if (adminEmail && adminPassword) {
+  console.log(`Bootstrapping admin user: ${adminEmail}`);
   const row = db
     .prepare("SELECT id FROM users WHERE email = ?")
     .get(adminEmail);

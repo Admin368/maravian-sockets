@@ -25,7 +25,7 @@ const program = new Command();
 program
   .name("maravian-sockets")
   .description("Maravian Sockets CLI - v3.0")
-  .version("0.2.0");
+  .version("0.3.0");
 
 // Enhanced init command that sets up the entire project
 program
@@ -53,7 +53,11 @@ program
 program
   .command("push")
   .description("push schema to server")
-  .option("--server <url>", "server URL", "http://localhost:8080")
+  .option(
+    "--server <url>",
+    "server URL",
+    process.env.NEXT_PUBLIC_MSOCKET_SERVER_URL || "http://localhost:8080"
+  )
   .option("--app-id <id>", "application ID")
   .option("--app-key <key>", "application key")
   .option("--config <file>", "schema config file")
@@ -184,7 +188,11 @@ program
 program
   .command("generate")
   .description("generate TS types from latest schema")
-  .option("--server <url>", "server URL", process.env.NEXT_PUBLIC_MSOCKET_SERVER_URL || "http://localhost:8080")
+  .option(
+    "--server <url>",
+    "server URL",
+    process.env.NEXT_PUBLIC_MSOCKET_SERVER_URL || "http://localhost:8080"
+  )
   .option("--app-id <id>", "application ID")
   .option("--dts-out <file>", "output declaration file")
   .option("--ts-out <file>", "optional typed helper .ts file")
@@ -248,9 +256,21 @@ program
 program
   .command("schema:pull")
   .description("pull latest schema")
-  .requiredOption("--server <url>")
+  .option(
+    "--server <url>",
+    "server URL",
+    process.env.NEXT_PUBLIC_MSOCKET_SERVER_URL
+  )
   .option("--app-id <id>", "application ID")
   .action(async (opts) => {
+    // Validate server URL
+    if (!opts.server) {
+      console.error("\nMissing server URL. Please provide it via:");
+      console.error("- Command line: --server <url>");
+      console.error("- Environment variable: NEXT_PUBLIC_MSOCKET_SERVER_URL");
+      process.exit(1);
+    }
+
     // Get app ID from CLI option or environment variable
     if (!opts.appId) {
       opts.appId = process.env.MSOCKET_APP_ID;
@@ -287,9 +307,21 @@ program
 program
   .command("log")
   .description("list schema versions")
-  .requiredOption("--server <url>")
+  .option(
+    "--server <url>",
+    "server URL",
+    process.env.NEXT_PUBLIC_MSOCKET_SERVER_URL
+  )
   .option("--app-id <id>", "application ID")
   .action(async (opts) => {
+    // Validate server URL
+    if (!opts.server) {
+      console.error("\nMissing server URL. Please provide it via:");
+      console.error("- Command line: --server <url>");
+      console.error("- Environment variable: NEXT_PUBLIC_MSOCKET_SERVER_URL");
+      process.exit(1);
+    }
+
     // Get app ID from CLI option or environment variable
     if (!opts.appId) {
       opts.appId = process.env.MSOCKET_APP_ID;
@@ -502,8 +534,8 @@ async function initializeProject(appId?: string) {
   const socketsDir = path.join(cwd, MARAVIAN_DIR);
   if (!fs.existsSync(socketsDir)) fs.mkdirSync(socketsDir, { recursive: true });
 
-  // Create .env.local if missing
-  const envLocal = path.join(cwd, ".env.local");
+  // Create .env if missing
+  const envLocal = path.join(cwd, ".env");
   if (!fs.existsSync(envLocal)) {
     fs.writeFileSync(
       envLocal,
@@ -516,13 +548,15 @@ async function initializeProject(appId?: string) {
         "",
       ].join("\n")
     );
-    console.log("📝 Created .env.local");
+    console.log("📝 Created .env");
   }
 
   // Create schema.config.js
   const schemaPath = path.join(socketsDir, SCHEMA_FILE);
   if (!fs.existsSync(schemaPath)) {
-    const content = `/* eslint-disable @typescript-eslint/no-require-imports */\nconst { z, defineSchema } = require('@maravian/maravian-sockets-types');\n\nmodule.exports = defineSchema({\n  appId: process.env.NEXT_PUBLIC_MSOCKET_APP_ID || '${appId || "my-app"}',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat messages',\n      messages: [\n        { name: 'send', direction: 'both', payload: z.object({ username: z.string(), text: z.string() }) }\n      ]\n    },\n    {\n      topic: 'system.presence',\n      description: 'Presence',\n      messages: [\n        { name: 'user.join', direction: 'both', payload: z.object({ username: z.string() }) },\n        { name: 'user.leave', direction: 'both', payload: z.object({ username: z.string() }) }\n      ]\n    }\n  ]\n});\n`;
+    const content = `/* eslint-disable @typescript-eslint/no-require-imports */\nconst { z, defineSchema } = require('@maravian/maravian-sockets-types');\n\nmodule.exports = defineSchema({\n  appId: process.env.NEXT_PUBLIC_MSOCKET_APP_ID || '${
+      appId || "my-app"
+    }',\n  version: new Date().toISOString(),\n  topics: [\n    {\n      topic: 'chat.messages',\n      description: 'Chat messages',\n      messages: [\n        { name: 'send', direction: 'both', payload: z.object({ username: z.string(), text: z.string() }) }\n      ]\n    },\n    {\n      topic: 'system.presence',\n      description: 'Presence',\n      messages: [\n        { name: 'user.join', direction: 'both', payload: z.object({ username: z.string() }) },\n        { name: 'user.leave', direction: 'both', payload: z.object({ username: z.string() }) }\n      ]\n    }\n  ]\n});\n`;
     fs.writeFileSync(schemaPath, content);
     console.log("📝 Created", path.relative(cwd, schemaPath));
   }
@@ -568,11 +602,8 @@ async function initializeProject(appId?: string) {
   if (fs.existsSync(pkgPath)) {
     const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
     pkg.scripts = pkg.scripts || {};
-    pkg.scripts["msocket:init"] =
-      "npx @maravian/maravian-sockets-cli init";
-    pkg.scripts[
-      "msocket:create"
-    ] = `npx @maravian/maravian-sockets-cli init`;
+    pkg.scripts["msocket:init"] = "npx @maravian/maravian-sockets-cli init";
+    pkg.scripts["msocket:create"] = `npx @maravian/maravian-sockets-cli init`;
     pkg.scripts[
       "msocket:push"
     ] = `npx @maravian/maravian-sockets-cli push --config ${path.join(

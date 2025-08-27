@@ -11,7 +11,7 @@ export function ConnectionForm({ onConnect }: ConnectionFormProps) {
     process.env.NEXT_PUBLIC_MSOCKET_SERVER_URL || "http://localhost:8080"
   );
   const [appId, setAppId] = useState(
-    process.env.NEXT_PUBLIC_MSOCKET_APP_ID || "chat3"
+    process.env.NEXT_PUBLIC_MSOCKET_APP_ID || "chat4"
   );
   const [username, setUsername] = useState("");
 
@@ -61,7 +61,7 @@ export function ConnectionForm({ onConnect }: ConnectionFormProps) {
               value={appId}
               onChange={(e) => setAppId(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="chat3"
+              placeholder="chat4"
               required
             />
           </div>

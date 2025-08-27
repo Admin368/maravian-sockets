@@ -124,7 +124,7 @@ Visit http://localhost:3000 and start chatting!
 
 ### Environment Variables
 
-Create a `.env.local` file:
+Create a `.env` file:
 
 ```env
 NEXT_PUBLIC_SERVER_URL=http://localhost:8080

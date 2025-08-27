@@ -1,0 +1,7 @@
+{
+  "initialized": true,
+  "projectType": "nextjs",
+  "schemaPath": "msocket\\schema.config.js",
+  "generatedPath": "msocket\\generated.d.ts",
+  "version": "3.0.0"
+}

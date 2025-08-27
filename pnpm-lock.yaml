@@ -221,12 +221,6 @@ importers:
         specifier: ^5.5.4
         version: 5.9.2
 
-  test-v3:
-    dependencies:
-      '@maravian/maravian-sockets-types':
-        specifier: 0.2.0
-        version: 0.2.0
-
 packages:
 
   '@alloc/quick-lru@5.2.0':

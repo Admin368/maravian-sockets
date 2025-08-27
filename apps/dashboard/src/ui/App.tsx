@@ -3,7 +3,8 @@ import { Live } from "./Live";
 import { AdminUsers } from "./AdminUsers";
 import { SchemaPanel } from "./SchemaPanel";
 
-const serverUrl = process.env?.VITE_SERVER_URL || window.location.origin;
+const serverUrl =
+  (import.meta as any).env?.VITE_SERVER_URL || window.location.origin;
 
 function useApi() {
   const base = serverUrl;
