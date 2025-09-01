@@ -1,10 +1,13 @@
 {
   "name": "@maravian/maravian-sockets-sdk",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": false,
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "typedoc": {
+    "entryPoint": "src/index.tsx"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },

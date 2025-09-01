@@ -181,3 +181,36 @@ Publishing and Security
   - Any other sensitive configuration files
 - Safe packages for automatic publishing: types, sdk, cli
 - Always verify package contents before publishing using `npm pack --dry-run`
+
+Documentation System
+
+- **TypeDoc Integration**: Automated API documentation generation from TypeScript source code
+- **Documentation Website**: Next.js app at `apps/docs` serves generated documentation 
+- **Generation Commands**:
+  - `pnpm docs:generate` - Generate TypeDoc documentation to `docs/generated`
+  - `pnpm docs:serve` - Generate and serve docs locally on port 8000
+  - `pnpm docs:clean` - Clean generated documentation
+- **Documentation Sources**: 
+  - API docs auto-generated from TSDoc comments in source code
+  - Manual documentation can be added to the docs app
+  - README.md files are included in generated documentation
+
+Version Management and Release Process
+
+- **Branch Strategy**: Each version gets its own branch (e.g., `v0.5.0`)
+- **Version Tracking**: All changes documented in `HISTORY.md` with:
+  - Main objectives for the version
+  - Detailed breakdown of new features, improvements, and fixes
+  - Package publishing information
+- **Release Workflow**:
+  1. Create version branch from previous version/main
+  2. Update all package.json files to match branch version number
+  3. Complete development and testing
+  4. Update HISTORY.md with comprehensive version details
+  5. Generate and verify documentation
+  6. Build and test all packages
+  7. Publish packages following security guidelines (types, sdk, cli safe for auto-publish)
+  8. Deploy documentation website
+  9. Merge to main and create version tag
+- **Package Version Sync**: All packages in monorepo should maintain same version number
+- **Documentation Versioning**: Documentation is regenerated for each release with version-specific content

@@ -1,6 +1,6 @@
 {
   "name": "@maravian/maravian-sockets-cli",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": false,
   "type": "commonjs",
   "bin": {
@@ -8,11 +8,14 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "typedoc": {
+    "entryPoint": "src/index.ts"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@maravian/maravian-sockets-types": "^0.4.0",
+    "@maravian/maravian-sockets-types": "workspace:*",
     "commander": "^12.1.0",
     "dotenv": "^16.6.1",
     "ts-node": "^10.9.2",

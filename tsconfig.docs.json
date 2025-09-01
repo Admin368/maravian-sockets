@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "packages/types/src/**/*",
+    "packages/server/src/**/*", 
+    "packages/cli/src/**/*"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/apps/**",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/coverage/**"
+  ],
+  "compilerOptions": {
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "noEmit": true
+  }
+}

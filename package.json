@@ -1,6 +1,6 @@
 {
   "name": "maravian-sockets",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -19,10 +19,18 @@
     "dev:chat-demo": "pnpm --filter @maravian/maravian-sockets-chat-demo run dev",
     "build:chat-demo": "pnpm --filter @maravian/maravian-sockets-chat-demo run build",
     "start:chat-demo": "pnpm --filter @maravian/maravian-sockets-chat-demo run start",
-    "format": "node -e \"console.log('format placeholder')\""
+    "format": "node -e \"console.log('format placeholder')\"",
+    "docs:generate": "typedoc",
+    "docs:serve": "pnpm run docs:generate && cd docs/generated && python -m http.server 8000",
+    "docs:clean": "rimraf docs/generated"
   },
   "engines": {
     "node": ">=20 <21"
   },
-  "packageManager": "pnpm@9.7.0"
+  "packageManager": "pnpm@9.7.0",
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typedoc": "^0.28.12",
+    "typedoc-plugin-markdown": "^4.8.1"
+  }
 }
