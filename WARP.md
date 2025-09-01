@@ -171,3 +171,13 @@ Notes and gotchas
 - better-sqlite3 requires native toolchain for local node-gyp builds. If you lack a C++ build chain on Windows, prefer Docker for running the server or install the “Desktop development with C++” workload (Visual Studio Build Tools). The Docker flow avoids local compilation issues.
 - CORS_ORIGIN defaults to \*. Set it appropriately for non-dev environments.
 - App keys are shown only at creation time; store them securely.
+
+Publishing and Security
+
+- **CRITICAL**: Do NOT publish the server package (@maravian/maravian-sockets-server) unless explicitly requested by the user. The server package contains sensitive files (.env, database files) that should not be included in npm packages.
+- When publishing is required, ensure .npmignore is properly configured to exclude:
+  - .env files
+  - data/ directory (SQLite databases)
+  - Any other sensitive configuration files
+- Safe packages for automatic publishing: types, sdk, cli
+- Always verify package contents before publishing using `npm pack --dry-run`
