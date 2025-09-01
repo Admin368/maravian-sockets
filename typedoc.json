@@ -11,9 +11,13 @@
     "**/node_modules/**",
     "**/apps/**",
     "**/dist/**",
+    "**/build/**",
     "**/coverage/**",
     "**/*.test.*",
-    "**/*.spec.*"
+    "**/*.spec.*",
+    "**/test/**",
+    "**/tests/**",
+    "**/__tests__/**"
   ],
   "tsconfig": "tsconfig.docs.json",
   "out": "docs/generated",
@@ -62,5 +66,46 @@
     "notExported": true,
     "invalidLink": true,
     "notDocumented": false
-  }
+  },
+  "searchInComments": true,
+  "searchInDocuments": true,
+  "treatWarningsAsErrors": false,
+  "treatValidationWarningsAsErrors": false,
+  "cleanOutputDir": true,
+  "hideGenerator": false,
+  "disableSources": false,
+  "basePath": ".",
+  "excludeTags": ["@internal", "@private"],
+  "blockTags": [
+    "@alpha",
+    "@beta",
+    "@deprecated",
+    "@example",
+    "@experimental",
+    "@internal",
+    "@override",
+    "@param",
+    "@private",
+    "@public",
+    "@readonly",
+    "@remarks",
+    "@returns",
+    "@sealed",
+    "@see",
+    "@since",
+    "@throws",
+    "@version"
+  ],
+  "modifierTags": [
+    "@alpha",
+    "@beta",
+    "@deprecated",
+    "@experimental",
+    "@internal",
+    "@override",
+    "@private",
+    "@public",
+    "@readonly",
+    "@sealed"
+  ]
 }

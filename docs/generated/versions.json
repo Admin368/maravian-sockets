@@ -1,0 +1,16 @@
+{
+  "current": "0.5.0",
+  "latest": "0.5.0",
+  "versions": [
+    {
+      "version": "0.5.0",
+      "path": "/api/v0.5.0",
+      "label": "v0.5.0",
+      "isLatest": true,
+      "isStable": true,
+      "releaseDate": null
+    }
+  ],
+  "count": 1,
+  "generatedAt": "2025-09-01T07:06:03.626Z"
+}

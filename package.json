@@ -7,7 +7,11 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "pnpm -r run build",
+    "build": "node scripts/build.js",
+    "build:packages": "node scripts/build.js --skip-docs",
+    "build:clean": "node scripts/build.js --skip-clean",
+    "build:fast": "node scripts/build.js --skip-clean --skip-tests",
+    "test": "node scripts/build.js --docs-only --skip-clean",
     "dev": "pnpm run dev:server",
     "start": "pnpm run start:server",
     "dev:server": "pnpm --filter @maravian/maravian-sockets-server run dev",
@@ -20,9 +24,10 @@
     "build:chat-demo": "pnpm --filter @maravian/maravian-sockets-chat-demo run build",
     "start:chat-demo": "pnpm --filter @maravian/maravian-sockets-chat-demo run start",
     "format": "node -e \"console.log('format placeholder')\"",
-    "docs:generate": "typedoc",
-    "docs:serve": "pnpm run docs:generate && cd docs/generated && python -m http.server 8000",
+    "docs:generate": "node scripts/docs-build.js",
+    "docs:generate:version": "node scripts/docs-build.js --version",
     "docs:clean": "rimraf docs/generated",
+    "docs:serve": "pnpm run docs:generate && cd docs/generated && python -m http.server 8000",
     "docs:dev": "pnpm --filter @maravian/maravian-sockets-docs run dev",
     "docs:build": "pnpm run docs:generate && pnpm --filter @maravian/maravian-sockets-docs run build",
     "docs:start": "pnpm --filter @maravian/maravian-sockets-docs run start"
