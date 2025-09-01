@@ -54,10 +54,6 @@
     "includeCategories": true,
     "includeGroups": true
   },
-  "markdown": {
-    "hideBreadcrumbs": false,
-    "hideInPageTOC": false
-  },
   "githubPages": true,
   "gitRevision": "main",
   "gitRemote": "origin",

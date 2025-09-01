@@ -22,7 +22,10 @@
     "format": "node -e \"console.log('format placeholder')\"",
     "docs:generate": "typedoc",
     "docs:serve": "pnpm run docs:generate && cd docs/generated && python -m http.server 8000",
-    "docs:clean": "rimraf docs/generated"
+    "docs:clean": "rimraf docs/generated",
+    "docs:dev": "pnpm --filter @maravian/maravian-sockets-docs run dev",
+    "docs:build": "pnpm run docs:generate && pnpm --filter @maravian/maravian-sockets-docs run build",
+    "docs:start": "pnpm --filter @maravian/maravian-sockets-docs run start"
   },
   "engines": {
     "node": ">=20 <21"
