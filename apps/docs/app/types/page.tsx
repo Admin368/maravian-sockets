@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 // Get the types package documentation
 async function getTypesDocumentation() {
-  const docsPath = path.join(process.cwd(), '../../docs/generated/types/src');
+  const docsPath = path.join(process.cwd(), '../../docs/generated/latest/packages/types/src');
   
   try {
     // Read the main README for types
@@ -33,7 +33,7 @@ async function getTypesDocumentation() {
 
 // Get additional sections (functions, type-aliases, variables)
 async function getTypesSections() {
-  const docsPath = path.join(process.cwd(), '../../docs/generated/types/src');
+  const docsPath = path.join(process.cwd(), '../../docs/generated/latest/packages/types/src');
   const sections = ['functions', 'type-aliases', 'variables'];
   
   const sectionData = [];

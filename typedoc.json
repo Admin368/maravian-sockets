@@ -4,6 +4,7 @@
   "entryPoints": [
     "packages/types/src/index.ts",
     "packages/server/src/index.ts",
+    "packages/sdk/src/index.tsx",
     "packages/cli/src/index.ts"
   ],
   "entryPointStrategy": "expand",

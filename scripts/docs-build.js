@@ -97,6 +97,34 @@ function updateTypedocConfig(version) {
   return tempConfigPath;
 }
 
+function copyPackageReadmes(version) {
+  logSection('📋 Copying package README files');
+  
+  const packages = ['types', 'server', 'sdk', 'cli'];
+  const versionDir = `docs/generated/v${version}`;
+  
+  for (const pkg of packages) {
+    const srcReadme = `packages/${pkg}/README.md`;
+    const destDir = `${versionDir}/packages/${pkg}`;
+    const destReadme = `${destDir}/README.md`;
+    
+    if (fs.existsSync(srcReadme)) {
+      ensureDirectoryExists(destDir);
+      
+      // Copy the README file
+      try {
+        const content = fs.readFileSync(srcReadme, 'utf8');
+        fs.writeFileSync(destReadme, content);
+        log(`✅ Copied README for ${pkg} package`, 'green');
+      } catch (error) {
+        log(`⚠️  Could not copy README for ${pkg}: ${error.message}`, 'yellow');
+      }
+    } else {
+      log(`⚠️  README not found for ${pkg} package: ${srcReadme}`, 'yellow');
+    }
+  }
+}
+
 function generateApiDocs(version) {
   logSection('📖 Generating API documentation');
   
@@ -105,6 +133,9 @@ function generateApiDocs(version) {
   try {
     execCommand(`npx typedoc --options "${tempConfigPath}"`);
     log('✅ API documentation generated successfully', 'green');
+    
+    // Copy package README files to the generated docs
+    copyPackageReadmes(version);
   } catch (error) {
     log('❌ API documentation generation failed', 'red');
     throw error;
@@ -303,6 +334,9 @@ function main() {
     const versionsData = generateVersionIndex();
     generateReadme(targetVersion);
     
+    // Copy docs to apps/docs public directory for serving
+    copyDocsToApps(targetVersion);
+    
     logSection('🎉 Documentation build completed!');
     log(`Version: v${targetVersion}`, 'green');
     log(`Output: docs/generated/v${targetVersion}`, 'blue');
@@ -315,6 +349,30 @@ function main() {
   }
 }
 
+function copyDocsToApps(version) {
+  logSection('📂 Copying documentation to apps/docs');
+  
+  const sourceDir = 'docs/generated';
+  const targetDir = 'apps/docs/public/docs';
+  
+  // Ensure target directory exists
+  ensureDirectoryExists(targetDir);
+  
+  try {
+    // Copy the entire generated docs directory
+    if (process.platform === 'win32') {
+      execCommand(`xcopy "${sourceDir}" "${targetDir}" /E /I /H /Y`);
+    } else {
+      execCommand(`cp -r "${sourceDir}/"* "${targetDir}/"`);
+    }
+    
+    log('✅ Documentation copied to apps/docs/public/docs', 'green');
+  } catch (error) {
+    log('⚠️  Could not copy docs to apps directory', 'yellow');
+    log(error.message, 'yellow');
+  }
+}
+
 if (require.main === module) {
   main();
 }
@@ -324,5 +382,7 @@ module.exports = {
   generateVersionIndex,
   createLatestSymlink,
   generateReadme,
+  copyPackageReadmes,
+  copyDocsToApps,
   getPackageInfo
 };

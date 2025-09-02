@@ -7,5 +7,6 @@
 ## Modules
 
 - [packages/cli/src](packages/cli/src/README.md)
+- [packages/sdk/src](packages/sdk/src/README.md)
 - [packages/server/src](packages/server/src/README.md)
 - [packages/types/src](packages/types/src/README.md)

@@ -3,6 +3,7 @@
   "include": [
     "packages/types/src/**/*",
     "packages/server/src/**/*", 
+    "packages/sdk/src/**/*",
     "packages/cli/src/**/*"
   ],
   "exclude": [

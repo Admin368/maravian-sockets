@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 // Get the server package documentation
 async function getServerDocumentation() {
-  const docsPath = path.join(process.cwd(), '../../docs/generated/server/src');
+  const docsPath = path.join(process.cwd(), '../../docs/generated/latest/packages/server/src');
   
   try {
     // Read the main README for server
